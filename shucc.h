@@ -23,12 +23,15 @@ struct Token {
 	Token * next;   // next token
 	int val;        // number, when kind is TK_NUM
 	char * str;     // token string
+	int len;        // length of token (e.g. 2 when ==)
 };
 
 /*
  * kind of nodes in the syntax tree
  */
 typedef enum {
+	ND_LE,  // <=
+	ND_LT,  // <
 	ND_ADD, // +
 	ND_SUB, // -
 	ND_MUL, // *
@@ -52,20 +55,24 @@ void error(char * fmt, ...);
 void error_at(char * loc, char * fmt, ...);
 
 /* tokenize.c */
-bool consume(char op);
-void expect(char op);
+bool consume(char * op);
+void expect(char * op);
 int expect_number();
 bool at_eof();
-Token *new_token(TokenKind kind, Token * cur, char * str);
-Token *tokenize(char * p);
+Token * new_token(TokenKind kind, Token * cur, char * str, int len);
+bool startswith(char * p, char * q);
+Token * tokenize(char * p);
 
 /* parse.c */
 Node * new_node(NodeKind kind, Node * lhs, Node * rhs);
 Node * new_node_num(int val);
-Node * expr();    // expr = mul ("+" mul | "-" mul)*
-Node * mul();     // mul = unary ("*" unary | "/" unary)*
-Node * unary();   // unary = ("+" | "-")? primary
-Node * primary(); // primary = "(" expr ")" | num
+// Node * expr();       // expr = equality
+// Node * equality();   // equality = relational ("==" relational | "!=" relational)*
+Node * relational(); // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+Node * add();        // add = mul ("+" mul | "-" mul)*
+Node * mul();        // mul = unary ("*" unary | "/" unary)*
+Node * unary();      // unary = ("+" | "-")? primary
+Node * primary();    // primary = "(" expr ")" | num
 
 /* codegen.c */
 void gen(Node * node);

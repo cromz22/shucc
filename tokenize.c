@@ -5,8 +5,10 @@
  * @param  op    symbol to be skipped
  * @return bool  true if skipped
  */
-bool consume(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op) {
+bool consume(char * op) {
+	if (token->kind != TK_RESERVED ||
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len)) {
 		return false;
 	}
 	token = token->next;
@@ -14,12 +16,14 @@ bool consume(char op) {
 }
 
 /**
- * Expect the next token to be the symbol op i.e. skip op.
+ * Expect the next token to be the symbol op (i.e. skip op) and raise error if not skipped 
  * @param op  symbol to be expected
  */
-void expect(char op) {
-	if (token->kind != TK_RESERVED || token->str[0] != op) {
-		error("This is not '%c'", op);
+void expect(char * op) {
+	if (token->kind != TK_RESERVED ||
+        strlen(op) != token->len ||
+        memcmp(token->str, op, token->len)) {
+		error("This is not '%s'", op);
 	}
 	token = token->next;
 }
@@ -50,14 +54,25 @@ bool at_eof() {
  * @param  kind  kind of the new token
  * @param  cur   current token
  * @param  str   token string
+ * @param  len   length of reserved token
  * @return tok   created token
  */
-Token *new_token(TokenKind kind, Token * cur, char * str) {
+Token * new_token(TokenKind kind, Token * cur, char * str, int len) {
 	Token * tok = calloc(1, sizeof(Token));
 	tok->kind = kind;
 	tok->str = str;
+    tok->len = len;
 	cur->next = tok;
 	return tok;
+}
+
+/**
+ * check if *p starts with *q
+ * @param p  string to be checked
+ * @param q  string to check
+ */
+bool startswith(char * p, char * q) {
+    return memcmp(p, q, strlen(q)) == 0;
 }
 
 /**
@@ -78,8 +93,15 @@ Token *tokenize(char * p) {
 		}
 
 		// tokenize reserved token
-		if (strchr("+-*/()", *p)) {
-			cur = new_token(TK_RESERVED, cur, p); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
+        // two-letter reserved token
+        if (startswith(p, "<=") || startswith(p, ">=")) {
+            cur = new_token(TK_RESERVED, cur, p, 2);
+            p += 2;
+            continue;
+        }
+        // single-letter reserved token
+		if (strchr("+-*/()<>", *p)) {
+			cur = new_token(TK_RESERVED, cur, p, 1); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
 			p++;
 			continue;
 		}
@@ -92,7 +114,7 @@ Token *tokenize(char * p) {
 		 The second argument, which is an address, will indicate the position of it.
 		*/
 		if (isdigit(*p)) {
-			cur = new_token(TK_NUM, cur, p);
+			cur = new_token(TK_NUM, cur, p, 0);
 			cur->val = strtol(p, &p, 10);
 			continue;
 		}
@@ -100,7 +122,7 @@ Token *tokenize(char * p) {
 		error("Could not tokenize the string");
 	}
 
-	new_token(TK_EOF, cur, p); // create the last token
+	new_token(TK_EOF, cur, p, 0); // create the last token
 
 	return head.next; // the first token of the tokenized string
 
