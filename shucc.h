@@ -63,7 +63,8 @@ Token *tokenize(char * p);
 Node * new_node(NodeKind kind, Node * lhs, Node * rhs);
 Node * new_node_num(int val);
 Node * expr();    // expr = mul ("+" mul | "-" mul)*
-Node * mul();     // mul = primary ("*" primary | "/" primary)*
+Node * mul();     // mul = unary ("*" unary | "/" unary)*
+Node * unary();   // unary = ("+" | "-")? primary
 Node * primary(); // primary = "(" expr ")" | num
 
 /* codegen.c */

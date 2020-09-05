@@ -77,8 +77,8 @@ Token *tokenize(char * p) {
 			continue;
 		}
 
-		// tokenize + or -
-		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+		// tokenize reserved token
+		if (strchr("+-*/()", *p)) {
 			cur = new_token(TK_RESERVED, cur, p); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
 			p++;
 			continue;
