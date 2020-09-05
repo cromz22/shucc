@@ -1,6 +1,11 @@
 CFLAGS=-std=c11 -g -static
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-shucc: shucc.c
+shucc: $(OBJS)
+	$(CC) -o shucc $(OBJS) $(LDFLAGS)
+
+$(OBJS): shucc.h
 
 test: shucc
 	./test.sh

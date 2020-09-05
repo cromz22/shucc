@@ -1,63 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
-
-/** 
- * struct of token types
- */
-typedef enum {
-	TK_RESERVED, // symbol
-	TK_NUM,      // number
-	TK_EOF,      // end
-} TokenKind;
-
-/**
- * token struct
- */
-typedef struct Token Token;
-struct Token {
-	TokenKind kind; // token type
-	Token * next;   // next token
-	int val;        // number, when kind is TK_NUM
-	char * str;     // token string
-};
-
-Token * token; // current token
-
-/**
- * Report error.
- * @param fmt  error information
- */
-void error(char * fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
-}
-
-char * user_input; // input program
-
-/**
- * Report error with position.
- * @param loc  location of error
- * @param fmt  error information
- */
-void error_at(char * loc, char * fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-
-	int pos = loc - user_input;
-	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, " ");
-	fprintf(stderr, "^ ");
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
-}
+#include "shucc.h"
 
 /**
  * Skip symbol op.
@@ -137,7 +78,7 @@ Token *tokenize(char * p) {
 		}
 
 		// tokenize + or -
-		if (*p == '+' || *p == '-') {
+		if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
 			cur = new_token(TK_RESERVED, cur, p); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
 			p++;
 			continue;
@@ -163,37 +104,4 @@ Token *tokenize(char * p) {
 
 	return head.next; // the first token of the tokenized string
 
-}
-
-/**
- * main function
- * @param argc  the number of runtime arguments
- * @param argv  a string array of arguments
- */
-int main(int argc, char ** argv) {
-	if (argc != 2) {
-		fprintf(stderr, "invalid input\n");
-		return 1;
-	}
-
-	token = tokenize(argv[1]); // tokenize the given string and initialize token by the first one
-
-	printf(".intel_syntax noprefix\n");
-	printf(".globl main\n");
-	printf("main:\n");
-
-	printf("  mov rax, %d\n", expect_number());
-
-	while(!at_eof()) {
-		if (consume('+')) {
-			printf("  add rax, %d\n", expect_number());
-			continue;
-		}
-
-		expect('-');
-		printf("  sub rax, %d\n", expect_number());
-	}
-
-	printf("  ret\n");
-	return 0;
 }
