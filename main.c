@@ -3,7 +3,7 @@
 /* global variables */
 char * user_input; // input program
 Token * token; // current token
-
+Node * code[100]; // top-level array of statements
 /**
  * main function
  * @param argc  the number of runtime arguments
@@ -17,17 +17,12 @@ int main(int argc, char ** argv) {
 
 	token = tokenize(argv[1]); // tokenize the given string and initialize token by the first one
 	// fprintf(stderr, "tokenize OK\n");
-	Node * node = expr(); // generate AST from input
+	program(); // generate AST from input
 	// fprintf(stderr, "AST OK\n");
 
-	// prologue
-	printf(".intel_syntax noprefix\n");
-	printf(".globl main\n");
-	printf("main:\n");
+	// draw_ast(code);
 
-	gen(node); // generate assembly codes from AST
+	gen_x86(code);
 
-	printf("  pop rax\n"); // pop the result from stack top
-	printf("  ret\n"); // and return the value
 	return 0;
 }

@@ -16,6 +16,19 @@ bool consume(char * op) {
 }
 
 /**
+ * Skip identifier.
+ * @return identifier
+ */
+Token * consume_ident() {
+	if (token->kind != TK_IDENT) {
+		return false;
+	}
+	Token * ident = token;
+	token = token->next;
+	return ident;
+}
+
+/**
  * Expect the next token to be the symbol op (i.e. skip op) and raise error if not skipped 
  * @param op  symbol to be expected
  */
@@ -94,13 +107,14 @@ Token *tokenize(char * p) {
 
 		// tokenize reserved token
         // two-letter reserved token
-        if (startswith(p, "<=") || startswith(p, ">=") || startswith(p, "==") || startswith(p, "!=")) {
+        if (startswith(p, "<=") || startswith(p, ">=") || startswith(p, "==") ||
+		    startswith(p, "!=") || startswith(p, "==") || startswith(p, "!=")) {
             cur = new_token(TK_RESERVED, cur, p, 2);
             p += 2;
             continue;
         }
         // single-letter reserved token
-		if (strchr("+-*/()<>", *p)) {
+		if (strchr("+-*/()<>;", *p)) {
 			cur = new_token(TK_RESERVED, cur, p, 1); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
 			p++;
 			continue;

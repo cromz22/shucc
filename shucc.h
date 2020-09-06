@@ -9,6 +9,7 @@
  * struct of token types
  */
 typedef enum {
+	TK_IDENT,    // identifier
 	TK_RESERVED, // symbol
 	TK_NUM,      // number
 	TK_EOF,      // end
@@ -30,15 +31,17 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
-	ND_EQ,  // ==
-	ND_NE,  // !=
-	ND_LE,  // <=
-	ND_LT,  // <
-	ND_ADD, // +
-	ND_SUB, // -
-	ND_MUL, // *
-	ND_DIV, // /
-	ND_NUM, // integer
+	ND_LVAR,   // local variable
+	ND_ASSIGN, // =
+	ND_EQ,     // ==
+	ND_NE,     // !=
+	ND_LE,     // <=
+	ND_LT,     // <
+	ND_ADD,    // +
+	ND_SUB,    // -
+	ND_MUL,    // *
+	ND_DIV,    // /
+	ND_NUM,    // integer
 } NodeKind;
 
 /**
@@ -50,6 +53,7 @@ struct Node {
 	Node * lhs;    // left child
 	Node * rhs;    // right child
 	int val;       // leaf node (integer)
+	int offset;    // offset from 'a'
 };
 
 /*
@@ -82,6 +86,7 @@ void *map_at(Map *map, char *key);
 
 /* tokenize.c */
 bool consume(char * op);
+Token * consume_ident();
 void expect(char * op);
 int expect_number();
 bool at_eof();
@@ -92,17 +97,22 @@ Token * tokenize(char * p);
 /* parse.c */
 Node * new_node(NodeKind kind, Node * lhs, Node * rhs);
 Node * new_node_num(int val);
-Node * expr();       // expr = equality
+void program();   // program = stmt*
+Node * stmt();       // stmt = expr ";"
+Node * expr();       // expr = assign
+Node * assign();     // assign = equality ("=" assign)?
 Node * equality();   // equality = relational ("==" relational | "!=" relational)*
 Node * relational(); // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node * add();        // add = mul ("+" mul | "-" mul)*
 Node * mul();        // mul = unary ("*" unary | "/" unary)*
 Node * unary();      // unary = ("+" | "-")? primary
-Node * primary();    // primary = "(" expr ")" | num
+Node * primary();    // primary = "(" expr ")" | num | ident
 
 /* codegen.c */
 void gen(Node * node);
+void gen_x86(Node ** code);
 
 /* global variables */
 extern char * user_input; // input program
 extern Token * token; // current token
+extern Node * code[100]; // top-level array of statements
