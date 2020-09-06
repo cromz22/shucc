@@ -28,5 +28,7 @@ assert 0 "42 < 42"
 assert 1 "42 <= 42"
 assert 0 "42 > 42"
 assert 1 "42 >= 42"
+assert 1 "42 == 42"
+assert 0 "42 != 42"
 
 echo OK

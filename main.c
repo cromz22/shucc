@@ -17,7 +17,7 @@ int main(int argc, char ** argv) {
 
 	token = tokenize(argv[1]); // tokenize the given string and initialize token by the first one
 	// fprintf(stderr, "tokenize OK\n");
-	Node * node = relational(); // generate AST from input
+	Node * node = expr(); // generate AST from input
 	// fprintf(stderr, "AST OK\n");
 
 	// prologue

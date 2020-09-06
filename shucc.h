@@ -26,10 +26,12 @@ struct Token {
 	int len;        // length of token (e.g. 2 when ==)
 };
 
-/*
+/**
  * kind of nodes in the syntax tree
  */
 typedef enum {
+	ND_EQ,  // ==
+	ND_NE,  // !=
 	ND_LE,  // <=
 	ND_LT,  // <
 	ND_ADD, // +
@@ -39,7 +41,7 @@ typedef enum {
 	ND_NUM, // integer
 } NodeKind;
 
-/*
+/**
  * definition of node
  */
 typedef struct Node Node;
@@ -66,8 +68,8 @@ Token * tokenize(char * p);
 /* parse.c */
 Node * new_node(NodeKind kind, Node * lhs, Node * rhs);
 Node * new_node_num(int val);
-// Node * expr();       // expr = equality
-// Node * equality();   // equality = relational ("==" relational | "!=" relational)*
+Node * expr();       // expr = equality
+Node * equality();   // equality = relational ("==" relational | "!=" relational)*
 Node * relational(); // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node * add();        // add = mul ("+" mul | "-" mul)*
 Node * mul();        // mul = unary ("*" unary | "/" unary)*

@@ -25,6 +25,25 @@ Node * new_node_num(int val) {
 	return node;
  }
 
+Node * expr() {
+	Node * node = equality();
+	return node;
+}
+
+Node * equality() {
+	Node * node = relational();
+
+	for (;;) {
+		if (consume("==")) {
+			node = new_node(ND_EQ, node, relational());
+		} else if (consume("!=")) {
+			node = new_node(ND_NE, node, relational());
+		} else {
+			return node;
+		}
+	}
+}
+
 Node * relational() {
 	Node * node = add();
 
@@ -83,7 +102,7 @@ Node * unary() {
 
 Node * primary() {
 	if (consume("(")) {
-		Node * node = relational();
+		Node * node = expr();
 		expect(")");
 		return node;
 	}

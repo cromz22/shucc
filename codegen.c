@@ -13,6 +13,16 @@ void gen(Node * node) {
 	printf("  pop rax\n");
 
 	switch (node->kind) {
+		case ND_EQ:
+			printf("  cmp rax, rdi\n");
+			printf("  sete al\n");
+			printf("  movzb rax, al\n");
+			break;
+		case ND_NE:
+			printf("  cmp rax, rdi\n");
+			printf("  setne al\n");
+			printf("  movzb rax, al\n");
+			break;
 		case ND_LE:
 			printf("  cmp rax, rdi\n");
 			printf("  setle al\n");
