@@ -52,9 +52,33 @@ struct Node {
 	int val;       // leaf node (integer)
 };
 
+/*
+ * definition of Vector (~ array in Python)
+ */
+typedef struct {
+    void **data;
+    int capacity;
+    int len;
+} Vector;
+
+/*
+ * definition of Map (~ dictionary in Python)
+ */
+typedef struct {
+    Vector *keys;
+    Vector *vals;
+    int len;
+} Map;
+
 /* utils.c */
 void error(char * fmt, ...);
 void error_at(char * loc, char * fmt, ...);
+Vector *vec_create();
+void vec_push(Vector *vec, void *elem);
+void *vec_get(Vector *vec, int key);
+Map *map_create();
+void map_insert(Map *map, char *key, void *val);
+void *map_at(Map *map, char *key);
 
 /* tokenize.c */
 bool consume(char * op);

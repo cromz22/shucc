@@ -9,9 +9,9 @@ assert() {
 	actual="$?"
 
 	if [ "$actual" = "$expected" ]; then
-		echo "[Success] $input => $actual"
+		echo -e "\033[32m[Success]\033[m $input => $actual"
 	else
-		echo "[Failure] $input => expected $expected, but got $actual"
+		echo "\033[31m[Failure]\033[m $input => expected $expected, but got $actual"
 		exit 1
 	fi
 }
