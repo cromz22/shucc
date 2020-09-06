@@ -4,12 +4,12 @@
  * Report error.
  * @param fmt  error information
  */
-void error(char * fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
+void error(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
 }
 
 /**
@@ -17,17 +17,17 @@ void error(char * fmt, ...) {
  * @param loc  location of error
  * @param fmt  error information
  */
-void error_at(char * loc, char * fmt, ...) {
-	va_list ap;
-	va_start(ap, fmt);
+void error_at(char *loc, char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
 
-	int pos = loc - user_input;
-	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, " ");
-	fprintf(stderr, "^ ");
-	vfprintf(stderr, fmt, ap);
-	fprintf(stderr, "\n");
-	exit(1);
+    int pos = loc - user_input;
+    fprintf(stderr, "%s\n", user_input);
+    fprintf(stderr, "%*s", pos, " ");
+    fprintf(stderr, "^ ");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
 }
 
 int INITIAL_VECTOR_SIZE = 32;
@@ -250,13 +250,13 @@ void draw_node_tree(Node *node, int depth, char *role) {
  *
  * @param code A program.
  */
-void draw_ast(Node ** code) {
-	Node * node;
-	for (int i=0; i<100; i++) {
-		node = code[i];
-		if (node == NULL) {
-			break;
-		}
-		draw_node_tree(node, 1, "");
-	}
+void draw_ast(Node **code) {
+    Node *node;
+    for (int i = 0; i < 100; i++) {
+        node = code[i];
+        if (node == NULL) {
+            break;
+        }
+        draw_node_tree(node, 1, "");
+    }
 }
