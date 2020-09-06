@@ -4,6 +4,8 @@
 char * user_input; // input program
 Token * token; // current token
 Node * code[100]; // top-level array of statements
+Map * lvars;  // lvar manager
+
 /**
  * main function
  * @param argc  the number of runtime arguments
@@ -22,7 +24,7 @@ int main(int argc, char ** argv) {
 
 	// draw_ast(code);
 
-	gen_x86(code);
+	gen_x86();
 
 	return 0;
 }

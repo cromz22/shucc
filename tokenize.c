@@ -72,8 +72,14 @@ bool at_eof() {
  */
 Token * new_token(TokenKind kind, Token * cur, char * str, int len) {
 	Token * tok = calloc(1, sizeof(Token));
+
+	// map_insert (used inside primary@parse.c) uses strcmp, so str has to end with \0
+	char * str_sliced = calloc(len + 1, sizeof(char));
+	strncpy(str_sliced, str, len);
+	str_sliced[len] = '\0';
+
 	tok->kind = kind;
-	tok->str = str;
+	tok->str = str_sliced;
     tok->len = len;
 	cur->next = tok;
 	return tok;
@@ -86,6 +92,15 @@ Token * new_token(TokenKind kind, Token * cur, char * str, int len) {
  */
 bool startswith(char * p, char * q) {
     return memcmp(p, q, strlen(q)) == 0;
+}
+
+/**
+ * Check if c is alphabet, number, or _
+ * @param c  charcter to be checked
+ * @return   true if c is alphabet, number, or _
+ */
+bool is_alnum(char c) {
+	return isalnum(c) || c == '_';
 }
 
 /**
@@ -105,16 +120,27 @@ Token *tokenize(char * p) {
 			continue;
 		}
 
+		// tokenize local variables
+		if (isalpha(*p) || *p == '_') {  // the first letter must be alphabet or _
+			int len = 1;
+			while (is_alnum(p[len])) {  // letters thereafter may include numbers
+				len++;
+			}
+			cur = new_token(TK_IDENT, cur, p, len);
+			p += len;
+			continue;
+		}
+
 		// tokenize reserved token
         // two-letter reserved token
-        if (startswith(p, "<=") || startswith(p, ">=") || startswith(p, "==") ||
-		    startswith(p, "!=") || startswith(p, "==") || startswith(p, "!=")) {
+        if (startswith(p, "<=") || startswith(p, ">=") ||
+		    startswith(p, "!=") || startswith(p, "==")) {
             cur = new_token(TK_RESERVED, cur, p, 2);
             p += 2;
             continue;
         }
         // single-letter reserved token
-		if (strchr("+-*/()<>;", *p)) {
+		if (ispunct(*p)) { // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}
 			cur = new_token(TK_RESERVED, cur, p, 1); // create a new token, the type of which is TK_RESERVED, the previous token of which is cur, and the string representation of which is character *p
 			p++;
 			continue;

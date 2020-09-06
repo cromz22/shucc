@@ -181,11 +181,11 @@ void draw_node_tree(Node *node, int depth, char *role) {
                 draw_node_tree(node->lhs, depth + 1, "lhs");
                 draw_node_tree(node->rhs, depth + 1, "rhs");
                 break;
-            // case ND_ASSIGN:
-            //     fprintf(stderr, "ASSIGN\n");
-            //     draw_node_tree(node->lhs, depth + 1, "lhs");
-            //     draw_node_tree(node->rhs, depth + 1, "rhs");
-            //     break;
+            case ND_ASSIGN:
+                fprintf(stderr, "ASSIGN\n");
+                draw_node_tree(node->lhs, depth + 1, "lhs");
+                draw_node_tree(node->rhs, depth + 1, "rhs");
+                break;
             // case ND_RETURN:
             //     fprintf(stderr, "RETURN\n");
             //     draw_node_tree(node->lhs, depth + 1, "");
@@ -225,9 +225,9 @@ void draw_node_tree(Node *node, int depth, char *role) {
             // case ND_GVAR:
             //     fprintf(stderr, "GVAR(name: %s)\n", node->name);
             //     break;
-            // case ND_LVAR:
-            //     fprintf(stderr, "LVAR(name: %s)\n", node->name);
-            //     break;
+            case ND_LVAR:
+                fprintf(stderr, "LVAR(offset: %d)\n", node->offset);
+                break;
             case ND_NUM:
                 fprintf(stderr, "NUM(%d)\n", node->val);
                 break;

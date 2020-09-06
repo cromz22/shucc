@@ -56,7 +56,7 @@ struct Node {
 	int offset;    // offset from 'a'
 };
 
-/*
+/**
  * definition of Vector (~ array in Python)
  */
 typedef struct {
@@ -65,7 +65,7 @@ typedef struct {
     int len;
 } Vector;
 
-/*
+/**
  * definition of Map (~ dictionary in Python)
  */
 typedef struct {
@@ -73,6 +73,15 @@ typedef struct {
     Vector *vals;
     int len;
 } Map;
+
+/**
+ * definition of Lvar (struct for local variables)
+ */
+typedef struct Lvar {
+	char * name;
+	int len;
+	int offset;
+} Lvar;
 
 /* utils.c */
 void error(char * fmt, ...);
@@ -83,6 +92,8 @@ void *vec_get(Vector *vec, int key);
 Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
+void draw_node_tree(Node *node, int depth, char *role);
+void draw_ast(Node ** code);
 
 /* tokenize.c */
 bool consume(char * op);
@@ -110,9 +121,10 @@ Node * primary();    // primary = "(" expr ")" | num | ident
 
 /* codegen.c */
 void gen(Node * node);
-void gen_x86(Node ** code);
+void gen_x86();
 
 /* global variables */
 extern char * user_input; // input program
 extern Token * token; // current token
 extern Node * code[100]; // top-level array of statements
+extern Map * lvars;  // lvar manager

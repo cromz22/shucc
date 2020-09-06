@@ -23,9 +23,19 @@ Node * new_node_num(int val) {
 	node->kind = ND_NUM;
 	node->val = val;
 	return node;
- }
+}
+
+/*
+ * Check if there is a local variable whose name is tok.
+ * @param tok  token to be checked
+ */
+Lvar * find_lvar(Token * tok) {
+	return map_at(lvars, tok->str);
+}
 
 void program() {
+	lvars = map_create();
+
 	int i = 0;
 	while(!at_eof()) {
 		code[i] = stmt();
@@ -124,19 +134,31 @@ Node * unary() {
 }
 
 Node * primary() {
+	Node * node;
+	// case primary = "(" expr ")"
 	if (consume("(")) {
-		Node * node = expr();
+		node = expr();
 		expect(")");
 		return node;
 	}
 
+	// case primary = ident
 	Token * tok = consume_ident();
 	if (tok) {
-		Node * node = calloc(1, sizeof(Node));
+		node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		node->offset = (tok->str[0] - 'a' + 1) * 8;
+		Lvar * lvar = find_lvar(tok);
+		if (!lvar) {  // if this is the first time for the lvar to appear
+			lvar = calloc(1, sizeof(Lvar));
+			lvar->name = tok->str;
+			lvar->len = tok->len;
+			lvar->offset = (lvars->len + 1) * 8;
+			map_insert(lvars, tok->str, lvar);
+		}
+		node->offset = lvar->offset;
 		return node;
 	}
 
+	// case primary = num
 	return new_node_num(expect_number());
 }
