@@ -99,7 +99,7 @@ bool is_alnum(char c) { return isalnum(c) || c == '_'; }
  * @return  the keyword recognized
  */
 char *read_reserved(char *p) {
-    char *keywords[] = {"return"};
+    char *keywords[] = {"return", "if", "else"};
     for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         int len = strlen(keywords[i]);
         if (startswith(p, keywords[i]) && !is_alnum(p[len])) {  // variable like return1 is skipped

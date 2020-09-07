@@ -31,6 +31,7 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_IF,      // if
     ND_RETURN,  // return
     ND_LVAR,    // local variable
     ND_ASSIGN,  // =
@@ -54,7 +55,10 @@ struct Node {
     Node *lhs;      // left child
     Node *rhs;      // right child
     int val;        // leaf node (integer)
-    int offset;     // offset from 'a'
+    int offset;     // offset of variables (from RBP)
+    Node *cond;     // [IF] condition
+    Node *then;     // [IF] statement
+    Node *els;      // [IF] else statement
 };
 
 /**
@@ -111,6 +115,9 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 void program();      // program = stmt*
 Node *stmt();        // stmt = "return"? expr ";"
+                     //      | "if" "(" expr ")" stmt ("else" stmt)?
+                     //      | "while" "(" expr ")" stmt
+                     //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node *expr();        // expr = assign
 Node *assign();      // assign = equality ("=" assign)?
 Node *equality();    // equality = relational ("==" relational | "!=" relational)*

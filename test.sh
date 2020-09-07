@@ -33,5 +33,10 @@ assert 0 "42 != 42;"
 assert 14 "a = 3; b = 5 * 6 - 8; a + b / 2;"
 assert 8 "foo = 3; bar = 5; foo + bar;"
 assert 8 "foo = 3; bar = 5; return foo + bar;"
+assert 42 "if (1) return 42;"
+assert 42 "if (1) return 42; else return 43;"
+assert 43 "if (0) return 42; else return 43;"
+assert 42 "if (1) if (1) return 42; else return 43;"
+assert 11 "foo = 3; bar = 5; baz = 8; if (foo == 1) return foo + bar; if (foo == 2) return bar + baz; else return baz + foo;"
 
 echo OK

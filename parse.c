@@ -44,15 +44,29 @@ void program() {
 
 Node* stmt() {
     Node* node;
+
     if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
+        if (!consume(";")) {
+            error("';' is expected");
+        }
+    } else if (consume("if")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+        if (consume("else")) {
+            node->els = stmt();
+        }
     } else {
         node = expr();
-    }
-    if (!consume(";")) {
-        error("';' is expected");
+        if (!consume(";")) {
+            error("';' is expected");
+        }
     }
 
     return node;

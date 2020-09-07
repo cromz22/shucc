@@ -186,16 +186,16 @@ void draw_node_tree(Node *node, int depth, char *role) {
                 draw_node_tree(node->lhs, depth + 1, "lhs");
                 draw_node_tree(node->rhs, depth + 1, "rhs");
                 break;
-            // case ND_RETURN:
-            //     fprintf(stderr, "RETURN\n");
-            //     draw_node_tree(node->lhs, depth + 1, "");
-            //     break;
-            // case ND_IF:
-            //     fprintf(stderr, "IF\n");
-            //     draw_node_tree(node->cond, depth + 1, "cond");
-            //     draw_node_tree(node->then, depth + 1, "then");
-            //     draw_node_tree(node->els, depth + 1, "else");
-            //     break;
+            case ND_RETURN:
+                fprintf(stderr, "RETURN\n");
+                draw_node_tree(node->lhs, depth + 1, "");
+                break;
+            case ND_IF:
+                fprintf(stderr, "IF\n");
+                draw_node_tree(node->cond, depth + 1, "cond");
+                draw_node_tree(node->then, depth + 1, "then");
+                draw_node_tree(node->els, depth + 1, "else");
+                break;
             // case ND_WHILE:
             //     fprintf(stderr, "WHILE\n");
             //     draw_node_tree(node->cond, depth + 1, "cond");

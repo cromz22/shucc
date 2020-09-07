@@ -1,5 +1,8 @@
 #include "shucc.h"
 
+/* global variable */
+int label_counter = 0;  // used in if statement
+
 /**
  * Push the address of the node to stack top.
  * @param node  variable to be pushed
@@ -43,6 +46,20 @@ void gen(Node* node) {
             printf("  mov rsp, rbp\n");
             printf("  pop rbp\n");
             printf("  ret\n");
+            return;
+        case ND_IF:                                      // e.g. if (A) B else C
+            gen(node->cond);                             // push (the value of) A to stack top
+            printf("  pop rax\n");                       // rax = A
+            printf("  cmp rax, 0\n");                    // compare A with 0
+            printf("  je .Lels%03d\n", label_counter);   // if A == 0 jump to .LelsXXX (do not execute B)
+            gen(node->then);                             // if A != 0 do not jump (execute B)
+            printf("  jmp .Lend%03d\n", label_counter);  // when B is finished jump to .LendXXX (do not execute C)
+            printf(".Lels%03d:\n", label_counter);       //
+            if (node->els) {                             //
+                gen(node->els);                          // codes for C
+            }                                            //
+            printf(".Lend%03d:\n", label_counter);       // continue generating other assembly codes after this label
+            label_counter++;                             // prevent labels from overlapping
             return;
     }
 
