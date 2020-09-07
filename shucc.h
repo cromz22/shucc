@@ -31,6 +31,7 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_RETURN,  // return
     ND_LVAR,    // local variable
     ND_ASSIGN,  // =
     ND_EQ,      // ==
@@ -109,7 +110,7 @@ Token *tokenize(char *p);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 void program();      // program = stmt*
-Node *stmt();        // stmt = expr ";"
+Node *stmt();        // stmt = "return"? expr ";"
 Node *expr();        // expr = assign
 Node *assign();      // assign = equality ("=" assign)?
 Node *equality();    // equality = relational ("==" relational | "!=" relational)*

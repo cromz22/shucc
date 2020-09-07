@@ -15,7 +15,7 @@ void gen_lval(Node* node) {
 
 /**
  * generate assembly codes from AST
- * @param node root node of AST
+ * @param node  root node of AST
  */
 void gen(Node* node) {
     switch (node->kind) {
@@ -36,7 +36,16 @@ void gen(Node* node) {
             printf("  mov [rax], rdi\n");  // set value of a to be 1
             printf("  push rdi\n");        // push 1 so that a = 1 returns 1 (e.g. b = a = 1 must be b = 1)
             return;
+        case ND_RETURN:
+            gen(node->lhs);
+            printf("  pop rax\n");
+            // epilogue (redundant)
+            printf("  mov rsp, rbp\n");
+            printf("  pop rbp\n");
+            printf("  ret\n");
+            return;
     }
+
     gen(node->lhs);
     gen(node->rhs);
 

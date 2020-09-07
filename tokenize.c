@@ -94,6 +94,22 @@ bool startswith(char *p, char *q) { return memcmp(p, q, strlen(q)) == 0; }
 bool is_alnum(char c) { return isalnum(c) || c == '_'; }
 
 /**
+ * Recognize TK_RESERVED and returns it.
+ * @param p token to be recognized
+ * @return  the keyword recognized
+ */
+char *read_reserved(char *p) {
+    char *keywords[] = {"return"};
+    for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        int len = strlen(keywords[i]);
+        if (startswith(p, keywords[i]) && !is_alnum(p[len])) {  // variable like return1 is skipped
+            return keywords[i];
+        }
+    }
+    return NULL;
+}
+
+/**
  * Tokenize string *p.
  * @param p  string to be tokenized
  * @return   the first token of tokenized *p
@@ -107,6 +123,15 @@ Token *tokenize(char *p) {
         // skip spaces
         if (isspace(*p)) {
             p++;
+            continue;
+        }
+
+        // tokenize keywords
+        char *keyword = read_reserved(p);
+        if (keyword) {
+            int len = strlen(keyword);
+            cur = new_token(TK_RESERVED, cur, p, len);
+            p += len;
             continue;
         }
 

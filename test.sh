@@ -32,5 +32,6 @@ assert 1 "42 == 42;"
 assert 0 "42 != 42;"
 assert 14 "a = 3; b = 5 * 6 - 8; a + b / 2;"
 assert 8 "foo = 3; bar = 5; foo + bar;"
+assert 8 "foo = 3; bar = 5; return foo + bar;"
 
 echo OK
