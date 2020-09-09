@@ -21,6 +21,8 @@ void gen_lval(Node* node) {
  * @param node  root node of AST
  */
 void gen(Node* node) {
+    int local_label_counter;  // needed to work properly when if, while, and for are used at the same time
+
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
@@ -47,19 +49,32 @@ void gen(Node* node) {
             printf("  pop rbp\n");
             printf("  ret\n");
             return;
-        case ND_IF:                                      // e.g. if (A) B else C
-            gen(node->cond);                             // push (the value of) A to stack top
-            printf("  pop rax\n");                       // rax = A
-            printf("  cmp rax, 0\n");                    // compare A with 0
-            printf("  je .Lels%03d\n", label_counter);   // if A == 0 jump to .LelsXXX (do not execute B)
-            gen(node->then);                             // if A != 0 do not jump (execute B)
-            printf("  jmp .Lend%03d\n", label_counter);  // when B is finished jump to .LendXXX (do not execute C)
-            printf(".Lels%03d:\n", label_counter);       //
-            if (node->els) {                             //
-                gen(node->els);                          // codes for C
-            }                                            //
-            printf(".Lend%03d:\n", label_counter);       // continue generating other assembly codes after this label
-            label_counter++;                             // prevent labels from overlapping
+        case ND_IF:                                            // e.g. if (A) B else C
+            local_label_counter = label_counter++;             /* need to keep label_counter at the time */
+            gen(node->cond);                                   // push (the value of) A to stack top
+            printf("  pop rax\n");                             // rax = A
+            printf("  cmp rax, 0\n");                          // compare A with 0
+            printf("  je .Lels%03d\n", local_label_counter);   // if A == 0 jump to .LelsXXX (do not execute B)
+            gen(node->then);                                   // if A != 0 do not jump (execute B)
+            printf("  jmp .Lend%03d\n", local_label_counter);  // when B is finished jump to .LendXXX (do not execute C)
+            printf(".Lels%03d:\n", local_label_counter);       //
+            if (node->els) {                                   //
+                gen(node->els);                                // codes for C
+            }                                                  //
+            printf(".Lend%03d:\n", local_label_counter);       // continue generating other assembly codes after this
+            local_label_counter++;                             // prevent labels from overlapping
+            return;
+        case ND_WHILE:
+            local_label_counter = label_counter++;
+            printf(".Lbegin%03d:\n", local_label_counter);       // e.g. while (A) B
+            gen(node->cond);                                     // push A to stack top
+            printf("  pop rax\n");                               // rax = A
+            printf("  cmp rax, 0\n");                            // compare A with 0
+            printf("  je .Lend%03d\n", local_label_counter);     // if A == 0 jump to .LendXXX (do not execute B)
+            gen(node->then);                                     // execute B
+            printf("  jmp .Lbegin%03d\n", local_label_counter);  // loop again
+            printf(".Lend%03d:\n", local_label_counter);
+            local_label_counter++;
             return;
     }
 

@@ -31,6 +31,7 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_WHILE,   // while
     ND_IF,      // if
     ND_RETURN,  // return
     ND_LVAR,    // local variable

@@ -62,6 +62,13 @@ Node* stmt() {
         if (consume("else")) {
             node->els = stmt();
         }
+    } else if (consume("while")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
     } else {
         node = expr();
         if (!consume(";")) {

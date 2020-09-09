@@ -38,5 +38,7 @@ assert 42 "if (1) return 42; else return 43;"
 assert 43 "if (0) return 42; else return 43;"
 assert 42 "if (1) if (1) return 42; else return 43;"
 assert 11 "foo = 3; bar = 5; baz = 8; if (foo == 1) return foo + bar; if (foo == 2) return bar + baz; else return baz + foo;"
+assert 0 "foo = 3; while(foo > 0) foo = foo - 1; return foo;"
+assert 2 "foo = 3; while(foo > 0) if (foo == 2) return foo; else foo = foo - 1; return foo;"
 
 echo OK
