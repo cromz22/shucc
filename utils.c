@@ -201,13 +201,13 @@ void draw_node_tree(Node *node, int depth, char *role) {
                 draw_node_tree(node->cond, depth + 1, "cond");
                 draw_node_tree(node->then, depth + 1, "then");
                 break;
-            // case ND_FOR:
-            //     fprintf(stderr, "FOR\n");
-            //     draw_node_tree(node->init, depth + 1, "init");
-            //     draw_node_tree(node->cond, depth + 1, "cond");
-            //     draw_node_tree(node->upd, depth + 1, "update");
-            //     draw_node_tree(node->then, depth + 1, "then");
-            //     break;
+            case ND_FOR:
+                fprintf(stderr, "FOR\n");
+                draw_node_tree(node->init, depth + 1, "init");
+                draw_node_tree(node->cond, depth + 1, "cond");
+                draw_node_tree(node->loop, depth + 1, "update");
+                draw_node_tree(node->then, depth + 1, "then");
+                break;
             // case ND_BLOCK:
             //     fprintf(stderr, "BLOCK\n");
             //     for (int i = 0; i < node->stmts->len; i++) {

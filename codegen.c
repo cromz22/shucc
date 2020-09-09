@@ -76,6 +76,20 @@ void gen(Node* node) {
             printf(".Lend%03d:\n", local_label_counter);
             local_label_counter++;
             return;
+        case ND_FOR:                                             // e.g. for (A; B; C) D
+            local_label_counter = label_counter++;               //
+            gen(node->init);                                     // push A
+            printf(".Lbegin%03d:\n", local_label_counter);       //
+            gen(node->cond);                                     // push B
+            printf("  pop rax\n");                               // rax = B
+            printf("  cmp rax, 0\n");                            // compare B with 0
+            printf("  je .Lend%03d\n", local_label_counter);     // if B == 0 jump to .LendXXX (do not execute D and C)
+            gen(node->then);                                     // execute D
+            gen(node->loop);                                     // execute C
+            printf("  jmp .Lbegin%03d\n", local_label_counter);  // loop
+            printf(".Lend%03d:\n", local_label_counter);         //
+            local_label_counter++;
+            return;
     }
 
     gen(node->lhs);

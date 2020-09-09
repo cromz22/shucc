@@ -31,6 +31,7 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_FOR,     // for
     ND_WHILE,   // while
     ND_IF,      // if
     ND_RETURN,  // return
@@ -57,9 +58,11 @@ struct Node {
     Node *rhs;      // right child
     int val;        // leaf node (integer)
     int offset;     // offset of variables (from RBP)
-    Node *cond;     // [IF] condition
-    Node *then;     // [IF] statement
+    Node *cond;     // [IF, WHILE, FOR] condition
+    Node *then;     // [IF, WHILE, FOR] statement
     Node *els;      // [IF] else statement
+    Node *init;     // [FOR] first expression to initialize loop
+    Node *loop;     // [FOR] third expression to update loop
 };
 
 /**
