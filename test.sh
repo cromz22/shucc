@@ -41,5 +41,6 @@ assert 11 "foo = 3; bar = 5; baz = 8; if (foo == 1) return foo + bar; if (foo ==
 assert 0 "foo = 3; while(foo > 0) foo = foo - 1; return foo;"
 assert 2 "foo = 3; while(foo > 0) if (foo == 2) return foo; else foo = foo - 1; return foo;"
 assert 6 "for (i = 0; i < 5; i = i + 1) i = i + 1; return i;"
+assert 2 "a = 1; if(a == 1) { a = a + 1; return a; }"
 
 echo OK

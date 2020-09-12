@@ -45,7 +45,14 @@ void program() {
 Node* stmt() {
     Node* node;
 
-    if (consume("return")) {
+    if (consume("{")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        node->stmts = vec_create();  // initialize stmts
+        while (!consume("}")) {
+            vec_push(node->stmts, (void*)stmt());  // push stmt to stmts
+        }
+    } else if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();

@@ -90,6 +90,11 @@ void gen(Node* node) {
             printf(".Lend%03d:\n", local_label_counter);         //
             local_label_counter++;
             return;
+        case ND_BLOCK:
+            for (int i = 0; i < node->stmts->len; i++) {
+                gen(node->stmts->data[i]);
+            }
+            return;
     }
 
     gen(node->lhs);

@@ -31,6 +31,7 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_BLOCK,   // {}
     ND_FOR,     // for
     ND_WHILE,   // while
     ND_IF,      // if
@@ -49,6 +50,15 @@ typedef enum {
 } NodeKind;
 
 /**
+ * definition of Vector (~ array in Python)
+ */
+typedef struct {
+    void **data;   // contents of the vector
+    int capacity;  // capacity of the vector ( >= # contents )
+    int len;       // # contents of the vector
+} Vector;
+
+/**
  * definition of node
  */
 typedef struct Node Node;
@@ -63,16 +73,8 @@ struct Node {
     Node *els;      // [IF] else statement
     Node *init;     // [FOR] first expression to initialize loop
     Node *loop;     // [FOR] third expression to update loop
+    Vector *stmts;  // [BLOCK] statements inside a block
 };
-
-/**
- * definition of Vector (~ array in Python)
- */
-typedef struct {
-    void **data;
-    int capacity;
-    int len;
-} Vector;
 
 /**
  * definition of Map (~ dictionary in Python)
@@ -122,6 +124,7 @@ Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
                      //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+                     //      | "{" stmt* "}""
 Node *expr();        // expr = assign
 Node *assign();      // assign = equality ("=" assign)?
 Node *equality();    // equality = relational ("==" relational | "!=" relational)*

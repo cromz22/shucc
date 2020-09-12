@@ -35,7 +35,7 @@ int INITIAL_VECTOR_SIZE = 32;
 /**
  * Creates an empty vector.
  *
- * @return A vector.
+ * @return An empty vector
  */
 Vector *vec_create() {
     Vector *vec = malloc(sizeof(Vector));
@@ -48,8 +48,8 @@ Vector *vec_create() {
 /**
  * Pushes an item to a vector.
  *
- * @param vec A vector.
- * @param item An item to be registered.
+ * @param item An item to be registered
+ * @param vec  The item is pushed to this vector
  */
 void vec_push(Vector *vec, void *item) {
     if (vec->len == vec->capacity) {
@@ -208,12 +208,12 @@ void draw_node_tree(Node *node, int depth, char *role) {
                 draw_node_tree(node->loop, depth + 1, "update");
                 draw_node_tree(node->then, depth + 1, "then");
                 break;
-            // case ND_BLOCK:
-            //     fprintf(stderr, "BLOCK\n");
-            //     for (int i = 0; i < node->stmts->len; i++) {
-            //         draw_node_tree(node->stmts->data[i], depth + 1, "");
-            //     }
-            //     break;
+            case ND_BLOCK:
+                fprintf(stderr, "BLOCK\n");
+                for (int i = 0; i < node->stmts->len; i++) {
+                    draw_node_tree(node->stmts->data[i], depth + 1, "");
+                }
+                break;
             // case ND_FUNC_CALL:
             //     fprintf(stderr, "FUNC_CALL(name: %s)\n", node->name);
             //     for (int i = 0; i < node->args->len; i++) {
