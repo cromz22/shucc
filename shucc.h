@@ -119,6 +119,7 @@ void draw_node_tree(Node *node, int depth, char *role);
 void draw_ast(Func **code);
 
 /* tokenize.c */
+bool peek(char *op);
 bool consume(char *op);
 Token *consume_ident();
 void expect(char *op);
@@ -137,7 +138,9 @@ Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
                      //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
-                     //      | "{" stmt* "}""
+                     //      | "{" stmt* "}"
+                     //      | declaration ";"
+Node *declaration(); // declaration = "int" ident
 Node *expr();        // expr = assign
 Node *assign();      // assign = equality ("=" assign)?
 Node *equality();    // equality = relational ("==" relational | "!=" relational)*
