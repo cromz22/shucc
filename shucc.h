@@ -32,6 +32,7 @@ struct Token {
  */
 typedef enum {
     ND_BLOCK,   // {}
+    ND_FUNC_CALL,  // function call
     ND_FOR,     // for
     ND_WHILE,   // while
     ND_IF,      // if
@@ -74,6 +75,7 @@ struct Node {
     Node *init;     // [FOR] first expression to initialize loop
     Node *loop;     // [FOR] third expression to update loop
     Vector *stmts;  // [BLOCK] statements inside a block
+    char *name;     // [FUNC_CALL] function name
 };
 
 /**
@@ -126,7 +128,7 @@ Token *tokenize(char *p);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 void program();      // program = func*
-Func *func();        // func = ident "(" )" "{" stmt* "}"
+Func *func();        // func = ident "(" ")" "{" stmt* "}"
 Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
@@ -139,7 +141,7 @@ Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" ad
 Node *add();         // add = mul ("+" mul | "-" mul)*
 Node *mul();         // mul = unary ("*" unary | "/" unary)*
 Node *unary();       // unary = ("+" | "-")? primary
-Node *primary();     // primary = "(" expr ")" | num | ident
+Node *primary();     // primary = "(" expr ")" | num | ident ("(" ")")?
 
 /* codegen.c */
 void gen(Node *node);

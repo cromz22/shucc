@@ -43,7 +43,6 @@ void program() {
     code[i] = NULL;
 }
 
-// foo(aaa, bbb) { return 0; }
 Func* func() {
     Token* tok = consume_ident();
     if (!tok) {
@@ -216,18 +215,26 @@ Node* primary() {
     // case primary = ident
     Token* tok = consume_ident();
     if (tok) {
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        Lvar* lvar = find_lvar(tok);
-        if (!lvar) {  // if this is the first time for the lvar to appear
-            lvar = calloc(1, sizeof(Lvar));
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            lvar->offset = (fn->lvars->len + 1) * 8;
-            map_insert(fn->lvars, tok->str, lvar);
+        if (consume("(")) {  // function
+            node = calloc(1, sizeof(Node));
+            node->kind = ND_FUNC_CALL;
+            node->name = tok->str;
+            expect(")");
+            return node;
+        } else {  // variable
+            node = calloc(1, sizeof(Node));
+            node->kind = ND_LVAR;
+            Lvar* lvar = find_lvar(tok);
+            if (!lvar) {  // if this is the first time for the lvar to appear
+                lvar = calloc(1, sizeof(Lvar));
+                lvar->name = tok->str;
+                lvar->len = tok->len;
+                lvar->offset = (fn->lvars->len + 1) * 8;
+                map_insert(fn->lvars, tok->str, lvar);
+            }
+            node->offset = lvar->offset;
+            return node;
         }
-        node->offset = lvar->offset;
-        return node;
     }
 
     // case primary = num

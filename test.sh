@@ -43,5 +43,6 @@ assert 2 "main() { foo = 3; while(foo > 0) if (foo == 2) return foo; else foo = 
 assert 6 "main() { for (i = 0; i < 5; i = i + 1) i = i + 1; return i; }"
 assert 2 "main() { a = 1; if(a == 1) { a = a + 1; return a; } }"
 assert 3 "foo() {return 3;} main() { return 3; }"
+assert 3 "foo() {return 3;} main() { return foo(); }"
 
 echo OK

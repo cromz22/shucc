@@ -95,6 +95,10 @@ void gen(Node* node) {
                 gen(node->stmts->data[i]);
             }
             return;
+        case ND_FUNC_CALL:
+            printf("  call %s\n", node->name);  // callの結果がraxに入る
+            printf("  push rax\n");             // raxの値をstack topに積む
+            return;
     }
 
     gen(node->lhs);
