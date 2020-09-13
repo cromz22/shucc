@@ -31,23 +31,23 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
-    ND_BLOCK,   // {}
+    ND_BLOCK,      // {}
     ND_FUNC_CALL,  // function call
-    ND_FOR,     // for
-    ND_WHILE,   // while
-    ND_IF,      // if
-    ND_RETURN,  // return
-    ND_LVAR,    // local variable
-    ND_ASSIGN,  // =
-    ND_EQ,      // ==
-    ND_NE,      // !=
-    ND_LE,      // <=
-    ND_LT,      // <
-    ND_ADD,     // +
-    ND_SUB,     // -
-    ND_MUL,     // *
-    ND_DIV,     // /
-    ND_NUM,     // integer
+    ND_FOR,        // for
+    ND_WHILE,      // while
+    ND_IF,         // if
+    ND_RETURN,     // return
+    ND_LVAR,       // local variable
+    ND_ASSIGN,     // =
+    ND_EQ,         // ==
+    ND_NE,         // !=
+    ND_LE,         // <=
+    ND_LT,         // <
+    ND_ADD,        // +
+    ND_SUB,        // -
+    ND_MUL,        // *
+    ND_DIV,        // /
+    ND_NUM,        // integer
 } NodeKind;
 
 /**
@@ -76,6 +76,7 @@ struct Node {
     Node *loop;     // [FOR] third expression to update loop
     Vector *stmts;  // [BLOCK] statements inside a block
     char *name;     // [FUNC_CALL] function name
+    Vector *args;   //[FUND CALL] arguments
 };
 
 /**
@@ -100,6 +101,7 @@ typedef struct Func {
     char *name;
     Node *body;
     Map *lvars;
+    Vector *args;
 } Func;
 
 /* utils.c */
@@ -112,7 +114,7 @@ Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
 void draw_node_tree(Node *node, int depth, char *role);
-void draw_ast(Node **code);
+void draw_ast(Func **code);
 
 /* tokenize.c */
 bool consume(char *op);

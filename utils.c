@@ -214,14 +214,14 @@ void draw_node_tree(Node *node, int depth, char *role) {
                     draw_node_tree(node->stmts->data[i], depth + 1, "");
                 }
                 break;
-            // case ND_FUNC_CALL:
-            //     fprintf(stderr, "FUNC_CALL(name: %s)\n", node->name);
-            //     for (int i = 0; i < node->args->len; i++) {
-            //         char prefix[16] = {'\0'};
-            //         sprintf(prefix, "arg%d", i);
-            //         draw_node_tree(node->args->data[i], depth + 1, prefix);
-            //     }
-            //     break;
+            case ND_FUNC_CALL:
+                fprintf(stderr, "FUNC_CALL(name: %s)\n", node->name);
+                for (int i = 0; i < node->args->len; i++) {
+                    char prefix[16] = {'\0'};
+                    sprintf(prefix, "arg%d", i);
+                    draw_node_tree(node->args->data[i], depth + 1, prefix);
+                }
+                break;
             // case ND_GVAR:
             //     fprintf(stderr, "GVAR(name: %s)\n", node->name);
             //     break;
@@ -250,13 +250,20 @@ void draw_node_tree(Node *node, int depth, char *role) {
  *
  * @param code A program.
  */
-void draw_ast(Node **code) {
-    Node *node;
+void draw_ast(Func **code) {
     for (int i = 0; i < 100; i++) {
-        node = code[i];
-        if (node == NULL) {
+        Func *fn = code[i];
+        if (!fn) {
             break;
         }
-        draw_node_tree(node, 1, "");
+        fprintf(stderr, "%s(\n", fn->name);
+        for (int j = 0; j < fn->args->len; j++) {
+            char prefix[256] = {'\0'};
+            sprintf(prefix, "arg%d", j);
+            draw_node_tree(fn->args->data[j], 1, prefix);
+        }
+        fprintf(stderr, ")\n");
+        draw_node_tree(fn->body, 1, "");
+        fprintf(stderr, "\n");
     }
 }

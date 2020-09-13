@@ -3,6 +3,8 @@
 /* global variable */
 int label_counter = 0;  // used in if statement
 
+char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+
 /**
  * Push the address of the node to stack top.
  * @param node  variable to be pushed
@@ -96,6 +98,12 @@ void gen(Node* node) {
             }
             return;
         case ND_FUNC_CALL:
+            for (int i = 0; i < node->args->len; i++) {
+                gen(node->args->data[i]);
+            }
+            for (int i = node->args->len - 1; i >= 0; i--) {
+                printf("  pop %s\n", argregs[i]);
+            }
             printf("  call %s\n", node->name);  // callの結果がraxに入る
             printf("  push rax\n");             // raxの値をstack topに積む
             return;
@@ -149,17 +157,24 @@ void gen(Node* node) {
 /**
  *
  */
-void gen_func(Func* f) {
-    printf(".globl %s\n", f->name);
-    printf("\n%s:\n", f->name);
+void gen_func(Func* fn) {
+    printf(".globl %s\n", fn->name);
+    printf("\n%s:\n", fn->name);
 
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", f->lvars->len * 8);  // ローカル変数の領域を確保する
+    printf("  sub rsp, %d\n", fn->lvars->len * 8);  // ローカル変数の領域を確保する
+
+    // 引数の値を stack に push してローカル変数と同じように扱えるように
+    for (int i = 0; i < fn->args->len; i++) {
+        Node* arg = fn->args->data[i];  // ND_LVAR
+        printf("  lea rax, [rbp-%d]\n", arg->offset);
+        printf("  mov [rax], %s\n", argregs[i]);  // 第 i 引数の値をraxが指すメモリにコピー
+    }
 
     // 中身のコードを吐く
-    gen(f->body);
+    gen(fn->body);
 
     // epilogue (when fuction ends without return stmt)
     printf("  mov rsp, rbp\n");

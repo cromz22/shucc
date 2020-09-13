@@ -53,7 +53,22 @@ Func* func() {
     fn->name = tok->str;
     fn->lvars = map_create();
     expect("(");
-    expect(")");
+    fn->args = vec_create();
+    while (!consume(")")) {
+        if (0 < fn->args->len) {
+            expect(",");
+        }
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        Lvar* lvar = calloc(1, sizeof(Lvar));
+        tok = consume_ident();
+        lvar->name = tok->str;
+        lvar->len = tok->len;
+        lvar->offset = (fn->lvars->len + 1) * 8;
+        map_insert(fn->lvars, tok->str, lvar);
+        node->offset = lvar->offset;
+        vec_push(fn->args, node);
+    }
     expect("{");
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BLOCK;
@@ -219,7 +234,14 @@ Node* primary() {
             node = calloc(1, sizeof(Node));
             node->kind = ND_FUNC_CALL;
             node->name = tok->str;
-            expect(")");
+            node->args = vec_create();
+            while (!consume(")")) {
+                if (0 < node->args->len) {
+                    expect(",");
+                }
+                Node* arg = expr();
+                vec_push(node->args, arg);
+            }
             return node;
         } else {  // variable
             node = calloc(1, sizeof(Node));
