@@ -94,6 +94,12 @@ typedef struct Lvar {
     int offset;
 } Lvar;
 
+typedef struct Func {
+    char *name;
+    Node *body;
+    Map *lvars;
+} Func;
+
 /* utils.c */
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
@@ -119,7 +125,8 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-void program();      // program = stmt*
+void program();      // program = func*
+Func *func();        // func = ident "(" )" "{" stmt* "}"
 Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
@@ -141,5 +148,4 @@ void gen_x86();
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Node *code[100];   // top-level array of statements
-extern Map *lvars;        // lvar manager
+extern Func *code[100];   // top-level array of statements

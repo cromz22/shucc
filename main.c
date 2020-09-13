@@ -3,8 +3,7 @@
 /* global variables */
 char* user_input;  // input program
 Token* token;      // current token
-Node* code[100];   // top-level array of statements
-Map* lvars;        // lvar manager
+Func* code[100];   // top-level array of statements
 
 /**
  * main function

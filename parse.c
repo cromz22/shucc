@@ -1,5 +1,7 @@
 #include "shucc.h"
 
+Func* fn;  // 今読んでる関数
+
 /*
  * Create a non-leaf node.
  * @param kind  node kind
@@ -26,20 +28,42 @@ Node* new_node_num(int val) {
 }
 
 /*
- * Check if there is a local variable whose name is tok.
+ * Check if there is a local variable whose tok is tok.
  * @param tok  token to be checked
  */
-Lvar* find_lvar(Token* tok) { return map_at(lvars, tok->str); }
+Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
 
+// program = func*
 void program() {
-    lvars = map_create();
-
     int i = 0;
     while (!at_eof()) {
-        code[i] = stmt();
+        code[i] = func();
         i++;
     }
     code[i] = NULL;
+}
+
+// foo(aaa, bbb) { return 0; }
+Func* func() {
+    Token* tok = consume_ident();
+    if (!tok) {
+        error("Unexpected token");
+    }
+
+    fn = calloc(1, sizeof(Func));
+    fn->name = tok->str;
+    fn->lvars = map_create();
+    expect("(");
+    expect(")");
+    expect("{");
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_BLOCK;
+    node->stmts = vec_create();  // initialize stmts
+    while (!consume("}")) {
+        vec_push(node->stmts, (void*)stmt());  // push stmt to stmts
+    }
+    fn->body = node;
+    return fn;
 }
 
 Node* stmt() {
@@ -199,8 +223,8 @@ Node* primary() {
             lvar = calloc(1, sizeof(Lvar));
             lvar->name = tok->str;
             lvar->len = tok->len;
-            lvar->offset = (lvars->len + 1) * 8;
-            map_insert(lvars, tok->str, lvar);
+            lvar->offset = (fn->lvars->len + 1) * 8;
+            map_insert(fn->lvars, tok->str, lvar);
         }
         node->offset = lvar->offset;
         return node;

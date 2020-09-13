@@ -143,30 +143,38 @@ void gen(Node* node) {
 }
 
 /**
- * generate x86 specific assembly, prologue, and epilogue
+ *
  */
-void gen_x86() {
-    printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-    printf("main:\n");
+void gen_func(Func* f) {
+    printf(".globl %s\n", f->name);
+    printf("\n%s:\n", f->name);
 
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", lvars->len * 8);
+    printf("  sub rsp, %d\n", f->lvars->len * 8);  // ローカル変数の領域を確保する
 
-    Node* node;
-    for (int i = 0; i < 100; i++) {
-        node = code[i];
-        if (node == NULL) {
-            break;
-        }
-        gen(node);
-    }
-    printf("  pop rax\n");  // pop the result from stack top
+    // 中身のコードを吐く
+    gen(f->body);
 
-    // epilogue
+    // epilogue (when fuction ends without return stmt)
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
+}
+
+/**
+ * generate x86 specific assembly, prologue, and epilogue
+ */
+void gen_x86() {
+    printf(".intel_syntax noprefix\n");
+
+    Func* func;
+    for (int i = 0; i < 100; i++) {
+        func = code[i];
+        if (!func) {
+            break;
+        }
+        gen_func(func);
+    }
 }
