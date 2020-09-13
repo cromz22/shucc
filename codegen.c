@@ -107,6 +107,15 @@ void gen(Node* node) {
             printf("  call %s\n", node->name);  // callの結果がraxに入る
             printf("  push rax\n");             // raxの値をstack topに積む
             return;
+        case ND_ADDR:
+            gen_lval(node->lhs);  // address を積む
+            return;
+        case ND_DEREF:
+            gen(node->lhs);                // addressがstack topに積まれる
+            printf("  pop rax\n");         // rax = address
+            printf("  mov rax, [rax]\n");  // rax = そのaddressの値
+            printf("  push rax\n");        // 値をpush
+            return;
     }
 
     gen(node->lhs);

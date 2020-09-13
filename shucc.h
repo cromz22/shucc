@@ -31,6 +31,8 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
+    ND_ADDR, // &
+    ND_DEREF, // *
     ND_BLOCK,      // {}
     ND_FUNC_CALL,  // function call
     ND_FOR,        // for
@@ -142,7 +144,7 @@ Node *equality();    // equality = relational ("==" relational | "!=" relational
 Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node *add();         // add = mul ("+" mul | "-" mul)*
 Node *mul();         // mul = unary ("*" unary | "/" unary)*
-Node *unary();       // unary = ("+" | "-")? primary
+Node *unary();       // unary = ("+" | "-")? primary | "*" unary | "&" unary
 Node *primary();     // primary = "(" expr ")" | num | ident ("(" ")")?
 
 /* codegen.c */
