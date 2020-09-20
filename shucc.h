@@ -4,6 +4,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+
+typedef struct Token Token;
+typedef struct Node Node;
+typedef struct Type Type;
+typedef struct Lvar Lvar;
+typedef struct Map Map;
+typedef struct Vector Vector;
+typedef struct Func Func;
 
 /**
  * struct of token types
@@ -18,7 +27,7 @@ typedef enum {
 /**
  * token struct
  */
-typedef struct Token Token;
+
 struct Token {
     TokenKind kind;  // token type
     Token *next;     // next token
@@ -55,11 +64,11 @@ typedef enum {
 /**
  * definition of Vector (~ array in Python)
  */
-typedef struct {
+struct Vector {
     void **data;   // contents of the vector
     int capacity;  // capacity of the vector ( >= # contents )
     int len;       // # contents of the vector
-} Vector;
+};
 
 typedef enum {
     TY_INT,
@@ -67,59 +76,63 @@ typedef enum {
     TY_ARRAY,
 } TypeKind;
 
-typedef struct Type Type;
 struct Type {
     TypeKind kind;
     Type *ptr_to;
+    int type_size;
     // size_t array_size;  // array size when kind == ARRAY
 };
 
 /**
- * definition of node
+ * definition of Lvar (struct for local variables)
  */
-typedef struct Node Node;
-struct Node {
-    NodeKind kind;  // kind of the node
-    Node *lhs;      // left child
-    Node *rhs;      // right child
-    int val;        // leaf node (integer)
-    int offset;     // offset of variables (from RBP)
-    Node *cond;     // [IF, WHILE, FOR] condition
-    Node *then;     // [IF, WHILE, FOR] statement
-    Node *els;      // [IF] else statement
-    Node *init;     // [FOR] first expression to initialize loop
-    Node *loop;     // [FOR] third expression to update loop
-    Vector *stmts;  // [BLOCK] statements inside a block
-    char *name;     // [FUNC_CALL] function name
-    Vector *args;   // [FUND CALL] arguments
+struct Lvar {
+    char *name;
+    int len;
+    int offset;
     Type *type;
 };
 
 /**
  * definition of Map (~ dictionary in Python)
  */
-typedef struct {
+struct Map {
     Vector *keys;
     Vector *vals;
     int len;
-} Map;
+};
 
-/**
- * definition of Lvar (struct for local variables)
- */
-typedef struct Lvar {
-    char *name;
-    int len;
-    int offset;
-} Lvar;
-
-typedef struct Func {
+struct Func {
     char *name;
     Node *body;
     Map *lvars;
     Vector *args;
     Type *return_type;
-} Func;
+};
+
+/**
+ * definition of node
+ */
+struct Node {
+    NodeKind kind;  // kind of the node
+    Node *lhs;      // left child
+    Node *rhs;      // right child
+    int val;        // leaf node (integer)
+    // int offset;     // offset of variables (from RBP)
+    Node *cond;     // [IF, WHILE, FOR] condition
+    Node *then;     // [IF, WHILE, FOR] statement
+    Node *els;      // [IF] else statement
+    Node *init;     // [FOR] first expression to initialize loop
+    Node *loop;     // [FOR] third expression to update loop
+    Vector *stmts;  // [BLOCK] statements inside a block
+    char *name;     // [FUNC_CALL] function name  func->nameで置き換えられる
+    Vector *args;   // [FUNC_CALL] arguments
+    Type *type; // Lvar の type と同じ意味
+    Lvar *lvar; // Node が lvar を管理しているわけではないが、同じメンバにアクセスすることが多いため。今のNodeがどのlvarを指しているかが分かればいい(offsetでもいい)。
+    // 即値以外のNodeのTypeをすべてsemaで管理できる。nameにアクセスできるのでデバッグを親切にできる。
+    Func *func; // return_type にアクセスするため
+};
+
 
 /* utils.c */
 void error(char *fmt, ...);
@@ -132,7 +145,7 @@ Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
 void draw_node_tree(Node *node, int depth, char *role);
-void draw_ast(Func **code);
+void draw_ast(Map *code);
 
 /* tokenize.c */
 bool peek(char *op);
@@ -148,8 +161,8 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-void program();       // program = func*
-Func *func();         // func = ident "(" ")" "{" stmt* "}"
+Map* program();       // program = func*
+void func();          // func = ident "(" ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
                       //      | "while" "(" expr ")" stmt
@@ -165,12 +178,17 @@ Node *add();          // add = mul ("+" mul | "-" mul)*
 Node *mul();          // mul = unary ("*" unary | "/" unary)*
 Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
 Node *primary();      // primary = "(" expr ")" | num | ident ("(" ")")?
+Type *int_ty();
+Type *ptr_ty();
+int get_offset(Map *lvars);
 
 /* codegen.c */
 void gen(Node *node);
-void gen_x86();
+void gen_x86(Map *code);
 
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Func *code[100];   // top-level array of statements
+
+/* sema.c */
+void sema(Map *code);

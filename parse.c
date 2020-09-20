@@ -1,6 +1,38 @@
 #include "shucc.h"
 
+Map *code;
 Func* fn;  // 今読んでる関数
+
+
+Type *new_ty(TypeKind kind, int size) {
+    Type *ret = calloc(1, sizeof(Type)); // Typeのcallocはここでしかしない
+    ret->kind = kind;
+    ret->type_size = size;
+    return ret;
+}
+
+Type *int_ty() { return new_ty(TY_INT, 8); } // TODO 4
+
+// Type *char_ty() { return new_ty(TY_CHAR, 1); }
+
+Type *ptr_ty(Type *dest) {
+    Type *type = new_ty(TY_PTR, 8);
+    type->ptr_to = dest;
+    return type;
+}
+
+// /**
+//  * lvars を参照してこれまで確保されたスタック領域の総和を計算
+//  */
+// int get_offset(Map *lvars) {
+//     int offset = 0;
+//     for (int i = 0; i < lvars->len; i++) {
+//         LVar *lvar = vec_get(lvars->vals, i);
+//         if(!lvar->type)fprintf(stderr, "type is null!!!!!!!!!\n");
+//         offset += lvar->type->type_size;
+//     }
+//     return offset;
+// }
 
 /*
  * Create a non-leaf node.
@@ -24,6 +56,7 @@ Node* new_node_num(int val) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+    node->type = int_ty();
     return node;
 }
 
@@ -37,48 +70,45 @@ Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
  * Read a type.
  */
 Type* read_type() {
-    Type* type = calloc(1, sizeof(Type));
+    Type* type;
     if (consume("int")) {
-        type->kind = TY_INT;
+        type = int_ty();
     } else {
         error("No such type");
     }
     while (consume("*")) {
-        Type* ptr = calloc(1, sizeof(Type));
-        ptr->kind = TY_PTR;
-        ptr->ptr_to = type;
-        type = ptr;
+        type = ptr_ty(type);
     }
     return type;
 }
 
-// int ident
 Node* declaration() {
     Type* type = read_type();
-    Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
     Lvar* lvar = calloc(1, sizeof(Lvar));
     Token* tok = consume_ident();
+    lvar->type = type;
     lvar->name = tok->str;
     lvar->len = tok->len;
-    lvar->offset = (fn->lvars->len + 1) * 8;
+    Node* node = calloc(1, sizeof(Node));
+    node->type = type;
+    node->lvar = lvar;
+    node->kind = ND_LVAR;
     map_insert(fn->lvars, tok->str, lvar);
-    node->offset = lvar->offset;
     return node;  // ND_LVAR
 }
 
 // program = func*
-void program() {
+Map *program() {
+    code = map_create();
     int i = 0;
     while (!at_eof()) {
-        code[i] = func();
-        i++;
+        func();
     }
-    code[i] = NULL;
+    return code;
 }
 
-Func* func() {
-    Type* type = read_type();  // TODO: use this type
+void func() {
+    Type* type = read_type();
     Token* tok = consume_ident();
     if (!tok) {
         error("Unexpected token");
@@ -96,6 +126,9 @@ Func* func() {
         }
         vec_push(fn->args, declaration());
     }
+    
+    map_insert(code, fn->name, fn);
+    
     expect("{");
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BLOCK;
@@ -104,7 +137,6 @@ Func* func() {
         vec_push(node->stmts, (void*)stmt());  // push stmt to stmts
     }
     fn->body = node;
-    return fn;
 }
 
 Node* stmt() {
@@ -266,8 +298,13 @@ Node* primary() {
     Token* tok = consume_ident();
     if (tok) {
         if (consume("(")) {  // function
+            Func *fn = map_at(code, tok->str);
+            if (!fn) {
+                error("function '%s' not defined", tok->str);
+            }
             node = calloc(1, sizeof(Node));
             node->kind = ND_FUNC_CALL;
+            node->func = fn;
             node->name = tok->str;
             node->args = vec_create();
             while (!consume(")")) {
@@ -283,13 +320,9 @@ Node* primary() {
             node->kind = ND_LVAR;
             Lvar* lvar = find_lvar(tok);
             if (!lvar) {  // if this is the first time for the lvar to appear
-                lvar = calloc(1, sizeof(Lvar));
-                lvar->name = tok->str;
-                lvar->len = tok->len;
-                lvar->offset = (fn->lvars->len + 1) * 8;
-                map_insert(fn->lvars, tok->str, lvar);
+                error("lvar not defined");
             }
-            node->offset = lvar->offset;
+            node->lvar = lvar;
             return node;
         }
     }

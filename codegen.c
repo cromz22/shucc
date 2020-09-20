@@ -11,7 +11,8 @@ char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
  */
 void gen_lval(Node* node) {
     printf("  mov rax, rbp\n");  // rbp must not be moved while the function is executed, so copy it (address) to rax
-    printf("  sub rax, %d\n", node->offset);  // shift rax (address) by the offset of the node
+    printf("  sub rax, %d\n", node->lvar->offset);  // shift rax (address) by the offset of the node
+    // fprintf(stderr, "the offset of lvar: %s is %d\n", node->lvar->name, node->lvar->offset);
     printf("  push rax\n");                   // push the shifted address to the stack top
 }
 
@@ -173,18 +174,25 @@ void gen_func(Func* fn) {
     printf(".globl %s\n", fn->name);
     printf("\n%s:\n", fn->name);
 
+    int offset = 0;
+    for (int i = 0; i < fn->lvars->len; i++) {
+        Lvar *lvar = vec_get(fn->lvars->vals, i);
+        offset += lvar->type->type_size;
+        lvar->offset = offset;
+    }
+
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", fn->lvars->len * 8);  // ローカル変数の領域を確保する
+    printf("  sub rsp, %d\n", offset);  // ローカル変数の領域を確保する
 
     // 引数の値を stack に push してローカル変数と同じように扱えるように
     for (int i = 0; i < fn->args->len; i++) {
-        Node* arg = fn->args->data[i];  // ND_LVAR
-        printf("  lea rax, [rbp-%d]\n", arg->offset);
+        Node* arg = vec_get(fn->args, i);  // ND_LVAR
+        printf("  lea rax, [rbp-%d]\n", arg->lvar->offset);
         printf("  mov [rax], %s\n", argregs[i]);  // 第 i 引数の値をraxが指すメモリにコピー
     }
-
+    // fprintf(stderr, "arguments stacked\n");
     // 中身のコードを吐く
     gen(fn->body);
 
@@ -197,15 +205,11 @@ void gen_func(Func* fn) {
 /**
  * generate x86 specific assembly, prologue, and epilogue
  */
-void gen_x86() {
+void gen_x86(Map *code) {
     printf(".intel_syntax noprefix\n");
 
-    Func* func;
-    for (int i = 0; i < 100; i++) {
-        func = code[i];
-        if (!func) {
-            break;
-        }
-        gen_func(func);
+    for (int i = 0; i < code->len; i++) {
+        Func *fn = vec_get(code->vals, i);
+        gen_func(fn);
     }
 }
