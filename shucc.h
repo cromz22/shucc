@@ -31,8 +31,8 @@ struct Token {
  * kind of nodes in the syntax tree
  */
 typedef enum {
-    ND_ADDR, // &
-    ND_DEREF, // *
+    ND_ADDR,       // &
+    ND_DEREF,      // *
     ND_BLOCK,      // {}
     ND_FUNC_CALL,  // function call
     ND_FOR,        // for
@@ -61,6 +61,19 @@ typedef struct {
     int len;       // # contents of the vector
 } Vector;
 
+typedef enum {
+    TY_INT,
+    TY_PTR,
+    TY_ARRAY,
+} TypeKind;
+
+typedef struct Type Type;
+struct Type {
+    TypeKind kind;
+    Type *ptr_to;
+    // size_t array_size;  // array size when kind == ARRAY
+};
+
 /**
  * definition of node
  */
@@ -78,7 +91,8 @@ struct Node {
     Node *loop;     // [FOR] third expression to update loop
     Vector *stmts;  // [BLOCK] statements inside a block
     char *name;     // [FUNC_CALL] function name
-    Vector *args;   //[FUND CALL] arguments
+    Vector *args;   // [FUND CALL] arguments
+    Type *type;
 };
 
 /**
@@ -104,6 +118,7 @@ typedef struct Func {
     Node *body;
     Map *lvars;
     Vector *args;
+    Type *return_type;
 } Func;
 
 /* utils.c */
@@ -112,6 +127,7 @@ void error_at(char *loc, char *fmt, ...);
 Vector *vec_create();
 void vec_push(Vector *vec, void *elem);
 void *vec_get(Vector *vec, int key);
+void *vec_set(Vector *vec, int index, void *item);
 Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
@@ -132,23 +148,23 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-void program();      // program = func*
-Func *func();        // func = ident "(" ")" "{" stmt* "}"
-Node *stmt();        // stmt = "return"? expr ";"
-                     //      | "if" "(" expr ")" stmt ("else" stmt)?
-                     //      | "while" "(" expr ")" stmt
-                     //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
-                     //      | "{" stmt* "}"
-                     //      | declaration ";"
-Node *declaration(); // declaration = "int" ident
-Node *expr();        // expr = assign
-Node *assign();      // assign = equality ("=" assign)?
-Node *equality();    // equality = relational ("==" relational | "!=" relational)*
-Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
-Node *add();         // add = mul ("+" mul | "-" mul)*
-Node *mul();         // mul = unary ("*" unary | "/" unary)*
-Node *unary();       // unary = ("+" | "-")? primary | "*" unary | "&" unary
-Node *primary();     // primary = "(" expr ")" | num | ident ("(" ")")?
+void program();       // program = func*
+Func *func();         // func = ident "(" ")" "{" stmt* "}"
+Node *stmt();         // stmt = "return"? expr ";"
+                      //      | "if" "(" expr ")" stmt ("else" stmt)?
+                      //      | "while" "(" expr ")" stmt
+                      //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+                      //      | "{" stmt* "}"
+                      //      | declaration ";"
+Node *declaration();  // declaration = "int" ident
+Node *expr();         // expr = assign
+Node *assign();       // assign = equality ("=" assign)?
+Node *equality();     // equality = relational ("==" relational | "!=" relational)*
+Node *relational();   // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+Node *add();          // add = mul ("+" mul | "-" mul)*
+Node *mul();          // mul = unary ("*" unary | "/" unary)*
+Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
+Node *primary();      // primary = "(" expr ")" | num | ident ("(" ")")?
 
 /* codegen.c */
 void gen(Node *node);

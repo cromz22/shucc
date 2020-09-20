@@ -33,11 +33,28 @@ Node* new_node_num(int val) {
  */
 Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
 
-// int ident
-Node* declaration() {
-    if (!consume("int")) {
+/**
+ * Read a type.
+ */
+Type* read_type() {
+    Type* type = calloc(1, sizeof(Type));
+    if (consume("int")) {
+        type->kind = TY_INT;
+    } else {
         error("No such type");
     }
+    while (consume("*")) {
+        Type* ptr = calloc(1, sizeof(Type));
+        ptr->kind = TY_PTR;
+        ptr->ptr_to = type;
+        type = ptr;
+    }
+    return type;
+}
+
+// int ident
+Node* declaration() {
+    Type* type = read_type();
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
     Lvar* lvar = calloc(1, sizeof(Lvar));
@@ -61,6 +78,7 @@ void program() {
 }
 
 Func* func() {
+    Type* type = read_type();  // TODO: use this type
     Token* tok = consume_ident();
     if (!tok) {
         error("Unexpected token");
@@ -68,6 +86,7 @@ Func* func() {
 
     fn = calloc(1, sizeof(Func));
     fn->name = tok->str;
+    fn->return_type = type;
     fn->lvars = map_create();
     expect("(");
     fn->args = vec_create();

@@ -75,6 +75,23 @@ void *vec_get(Vector *vec, int index) {
 }
 
 /**
+ * Sets an item to a vector.
+ *
+ * @param vec A vector.
+ * @param index An index.
+ * @param item An item to be set
+ *
+ * @return An item.
+ */
+void *vec_set(Vector *vec, int index, void *item) {
+    if (index >= vec->len) {
+        return NULL;
+    }
+    vec->data[index] = item;
+    return item;
+}
+
+/**
  * Creates an empty map.
  *
  * @return A map.
@@ -231,14 +248,14 @@ void draw_node_tree(Node *node, int depth, char *role) {
             case ND_NUM:
                 fprintf(stderr, "NUM(%d)\n", node->val);
                 break;
-            // case ND_ADDR:
-            //     fprintf(stderr, "ADDR\n");
-            //     draw_node_tree(node->lhs, depth + 1, "");
-            //     break;
-            // case ND_DEREF:
-            //     fprintf(stderr, "DEREF\n");
-            //     draw_node_tree(node->lhs, depth + 1, "");
-            //     break;
+            case ND_ADDR:
+                fprintf(stderr, "ADDR\n");
+                draw_node_tree(node->lhs, depth + 1, "");
+                break;
+            case ND_DEREF:
+                fprintf(stderr, "DEREF\n");
+                draw_node_tree(node->lhs, depth + 1, "");
+                break;
             default:
                 break;
         }
