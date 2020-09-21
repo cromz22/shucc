@@ -51,6 +51,18 @@ int expect_number() {
 }
 
 /**
+ * Check if the current token is a specific symbol or operation.
+ * @param  op    A symbol or operation
+ * @return bool
+ */
+bool peek(char *op) {
+    if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len)) {
+        return false;
+    }
+    return true;
+}
+
+/**
  * See if the current token is EOF.
  * @return bool  true if EOF
  */
@@ -99,7 +111,7 @@ bool is_alnum(char c) { return isalnum(c) || c == '_'; }
  * @return  the keyword recognized
  */
 char *read_reserved(char *p) {
-    char *keywords[] = {"return", "if", "else", "while", "for"};
+    char *keywords[] = {"return", "if", "else", "while", "for", "int"};
     for (int i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         int len = strlen(keywords[i]);
         if (startswith(p, keywords[i]) && !is_alnum(p[len])) {  // variable like return1 is skipped

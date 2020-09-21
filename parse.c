@@ -34,6 +34,26 @@ Node* new_node_num(int val) {
  */
 Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
 
+Node* declaration() {
+    if (!consume("int")) {
+        error("No such type");
+    }
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+
+    Lvar* lvar = calloc(1, sizeof(Lvar));
+    Token* tok = consume_ident();
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    lvar->offset = (fn->lvars->size + 1) * 8;
+
+    map_insert(fn->lvars, tok->str, lvar);
+
+    node->offset = lvar->offset;
+
+    return node;
+}
+
 void program() {
     int i = 0;
     while (!at_eof()) {
@@ -59,19 +79,7 @@ Func* func() {
         if (0 < fn->args->size) {
             expect(",");
         }
-        Node* node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-
-        Lvar* lvar = calloc(1, sizeof(Lvar));
-        tok = consume_ident();
-        lvar->name = tok->str;
-        lvar->len = tok->len;
-        lvar->offset = (fn->lvars->size + 1) * 8;
-
-        map_insert(fn->lvars, tok->str, lvar);
-
-        node->offset = lvar->offset;
-        vec_push(fn->args, node);
+        vec_push(fn->args, declaration());
     }
     expect("{");
     // read body
@@ -88,7 +96,10 @@ Func* func() {
 Node* stmt() {
     Node* node;
 
-    if (consume("{")) {
+    if (peek("int")) {
+        node = declaration();
+        expect(";");
+    } else if (consume("{")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_BLOCK;
         node->stmts = vec_create();  // initialize stmts

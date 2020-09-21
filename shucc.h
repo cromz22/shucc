@@ -126,6 +126,7 @@ bool consume(char *op);
 Token *consume_ident();
 void expect(char *op);
 int expect_number();
+bool peek(char *op);
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
@@ -134,21 +135,23 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-void program();      // program = func*
-Func *func();        // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
-Node *stmt();        // stmt = "return"? expr ";"
-                     //      | "if" "(" expr ")" stmt ("else" stmt)?
-                     //      | "while" "(" expr ")" stmt
-                     //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
-                     //      | "{" stmt* "}""
-Node *expr();        // expr = assign
-Node *assign();      // assign = equality ("=" assign)?
-Node *equality();    // equality = relational ("==" relational | "!=" relational)*
-Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
-Node *add();         // add = mul ("+" mul | "-" mul)*
-Node *mul();         // mul = unary ("*" unary | "/" unary)*
-Node *unary();       // unary = ("+" | "-")? primary | "*" unary | "&" unary
-Node *primary();     // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
+Node *declaration();  // declaration = "int" ident
+void program();       // program = func*
+Func *func();         // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
+Node *stmt();         // stmt = "return"? expr ";"
+                      //      | "if" "(" expr ")" stmt ("else" stmt)?
+                      //      | "while" "(" expr ")" stmt
+                      //      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+                      //      | "{" stmt* "}"
+                      //      | declaration ";"
+Node *expr();         // expr = assign
+Node *assign();       // assign = equality ("=" assign)?
+Node *equality();     // equality = relational ("==" relational | "!=" relational)*
+Node *relational();   // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+Node *add();          // add = mul ("+" mul | "-" mul)*
+Node *mul();          // mul = unary ("*" unary | "/" unary)*
+Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
+Node *primary();      // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
 
 /* codegen.c */
 void gen(Node *node);
