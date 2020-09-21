@@ -143,30 +143,38 @@ void gen(Node* node) {
 }
 
 /**
- * generate x86 specific assembly, prologue, and epilogue
+ * generate codes for function prologue, body, and epilogue
  */
-void gen_x86() {
-    printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-    printf("main:\n");
+void gen_func(Func* fn) {
+    printf(".global %s\n", fn->name);
+    printf("%s:\n", fn->name);
 
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", lvars->len * 8);
+    printf("  sub rsp, %d\n", fn->lvars->len * 8);
 
-    Node* node;
-    for (int i = 0; i < 100; i++) {
-        node = code[i];
-        if (node == NULL) {
-            break;
-        }
-        gen(node);
-    }
-    printf("  pop rax\n");  // pop the result from stack top
+    // body
+    gen(fn->body);
 
-    // epilogue
+    // epilogue (needed when function ends without return statement)
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
+}
+
+/**
+ * generate x86 specific assembly
+ */
+void gen_x86() {
+    printf(".intel_syntax noprefix\n");
+
+    Func* func;
+    for (int i = 0; i < 100; i++) {
+        func = code[i];
+        if (!func) {
+            break;
+        }
+        gen_func(func);
+    }
 }

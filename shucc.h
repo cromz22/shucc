@@ -8,6 +8,8 @@
 typedef struct Token Token;
 typedef struct Node Node;
 typedef struct Lvar Lvar;
+typedef struct Func Func;
+
 typedef struct Vector Vector;
 typedef struct Map Map;
 
@@ -74,6 +76,12 @@ struct Lvar {
     int offset;  // offset of the variable from RBP
 };
 
+struct Func {
+    char *name;  // name of the function
+    Node *body;  // statements inside the function
+    Map *lvars;  // local variables used inside the function
+};
+
 /**
  * Vector (~ array in Python)
  */
@@ -117,7 +125,8 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-void program();      // program = stmt*
+void program();      // program = func*
+Func *func();        // func = ident "(" ")" "{" stmt* "}"
 Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
@@ -139,5 +148,4 @@ void gen_x86();
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Node *code[100];   // top-level array of statements
-extern Map *lvars;        // lvar manager
+extern Func *code[100];   // top-level array of statements
