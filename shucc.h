@@ -7,6 +7,7 @@
 
 typedef struct Token Token;
 typedef struct Node Node;
+typedef struct Type Type;
 typedef struct Lvar Lvar;
 typedef struct Func Func;
 
@@ -70,6 +71,20 @@ struct Node {
     Vector *stmts;    // [BLOCK] statements inside a block
     char *func_name;  // [FUNC CALL] function name
     Vector *args;     // [FUNC CALL] function arguments (used every time the function is called)
+    Type *type;       // e.g. int x; x + 3; => type of x + 3 aka type of this ND_ADD is int
+};
+
+/**
+ * TypeKind and Type
+ */
+typedef enum {
+    TY_INT,
+    TY_PTR,
+} TypeKind;
+
+struct Type {
+    TypeKind kind;
+    Type *ptr_to;
 };
 
 /**
@@ -85,10 +100,11 @@ struct Lvar {
  * struct for functions
  */
 struct Func {
-    char *name;    // name of the function
-    Node *body;    // statements inside the function
-    Map *lvars;    // local variables used inside the function
-    Vector *args;  // arguments of the function
+    char *name;         // name of the function
+    Node *body;         // statements inside the function
+    Map *lvars;         // local variables used inside the function
+    Vector *args;       // arguments of the function
+    Type *return_type;  // type of returned value
 };
 
 /**

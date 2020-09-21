@@ -9,9 +9,6 @@ char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for fu
  * @param node  variable to be pushed
  */
 void gen_lval(Node* node) {
-    if (node->kind != ND_LVAR) {
-        error("invalid left value");
-    }
     printf("  mov rax, rbp\n");  // rbp must not be moved while the function is executed, so copy it (address) to rax
     printf("  sub rax, %d\n", node->offset);  // shift rax (address) by the offset of the node
     printf("  push rax\n");                   // push the shifted address to the stack top
@@ -34,13 +31,19 @@ void gen(Node* node) {
             printf("  mov rax, [rax]\n");  // rax = value of x
             printf("  push rax\n");        // push value of x to stack
             return;
-        case ND_ASSIGN:                    // e.g. a = 1; node->lhs = a, node->rhs = 1
-            gen_lval(node->lhs);           // push address of a to stack top
-            gen(node->rhs);                // push 1 to stack top
-            printf("  pop rdi\n");         // rdi = 1
-            printf("  pop rax\n");         // rax = address of a
-            printf("  mov [rax], rdi\n");  // set value of a to be 1
-            printf("  push rdi\n");        // push 1 so that a = 1 returns 1 (e.g. b = a = 1 must be b = 1)
+        case ND_ASSIGN:
+            if (node->lhs->kind == ND_LVAR) {
+                gen_lval(node->lhs);
+            } else if (node->lhs->kind == ND_DEREF) {
+                gen(node->lhs->lhs);  // e.g. x: some address, node->lhs: *x, node->lhs->lhs: x
+            } else {
+                error("invalid left value");
+            }
+            gen(node->rhs);
+            printf("  pop rdi\n");
+            printf("  pop rax\n");
+            printf("  mov [rax], rdi\n");
+            printf("  push rdi\n");
             return;
         case ND_RETURN:
             gen(node->lhs);
