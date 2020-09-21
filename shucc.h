@@ -35,36 +35,38 @@ struct Token {
  * NodeKind and Node
  */
 typedef enum {
-    ND_BLOCK,   // {}
-    ND_FOR,     // for
-    ND_WHILE,   // while
-    ND_IF,      // if
-    ND_RETURN,  // return
-    ND_LVAR,    // local variable
-    ND_ASSIGN,  // =
-    ND_EQ,      // ==
-    ND_NE,      // !=
-    ND_LE,      // <=
-    ND_LT,      // <
-    ND_ADD,     // +
-    ND_SUB,     // -
-    ND_MUL,     // *
-    ND_DIV,     // /
-    ND_NUM,     // integer
+    ND_FUNC_CALL,  // function call
+    ND_BLOCK,      // {}
+    ND_FOR,        // for
+    ND_WHILE,      // while
+    ND_IF,         // if
+    ND_RETURN,     // return
+    ND_LVAR,       // local variable
+    ND_ASSIGN,     // =
+    ND_EQ,         // ==
+    ND_NE,         // !=
+    ND_LE,         // <=
+    ND_LT,         // <
+    ND_ADD,        // +
+    ND_SUB,        // -
+    ND_MUL,        // *
+    ND_DIV,        // /
+    ND_NUM,        // integer
 } NodeKind;
 
 struct Node {
-    NodeKind kind;  // kind of the node
-    Node *lhs;      // left child
-    Node *rhs;      // right child
-    int val;        // leaf node (integer)
-    int offset;     // offset of variables (from RBP)
-    Node *cond;     // [IF, WHILE, FOR] condition
-    Node *then;     // [IF, WHILE, FOR] statement
-    Node *els;      // [IF] else statement
-    Node *init;     // [FOR] first expression to initialize loop
-    Node *loop;     // [FOR] third expression to update loop
-    Vector *stmts;  // [BLOCK] statements inside a block
+    NodeKind kind;    // kind of the node
+    Node *lhs;        // left child
+    Node *rhs;        // right child
+    int val;          // leaf node (integer)
+    int offset;       // offset of variables (from RBP)
+    Node *cond;       // [IF, WHILE, FOR] condition
+    Node *then;       // [IF, WHILE, FOR] statement
+    Node *els;        // [IF] else statement
+    Node *init;       // [FOR] first expression to initialize loop
+    Node *loop;       // [FOR] third expression to update loop
+    Vector *stmts;    // [BLOCK] statements inside a block
+    char *func_name;  // [FUNC CALL] function name
 };
 
 /**
@@ -139,7 +141,7 @@ Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" ad
 Node *add();         // add = mul ("+" mul | "-" mul)*
 Node *mul();         // mul = unary ("*" unary | "/" unary)*
 Node *unary();       // unary = ("+" | "-")? primary
-Node *primary();     // primary = "(" expr ")" | num | ident
+Node *primary();     // primary = "(" expr ")" | num | ident ( "(" ")" )?
 
 /* codegen.c */
 void gen(Node *node);

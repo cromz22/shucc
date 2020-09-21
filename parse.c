@@ -218,16 +218,22 @@ Node* primary() {
     Token* tok = consume_ident();
     if (tok) {
         node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        Lvar* lvar = find_lvar(tok);
-        if (!lvar) {  // if this is the first time for the lvar to appear
-            lvar = calloc(1, sizeof(Lvar));
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            lvar->offset = (fn->lvars->len + 1) * 8;
-            map_insert(fn->lvars, tok->str, lvar);
+        if (consume("(")) {  // function
+            node->kind = ND_FUNC_CALL;
+            node->func_name = tok->str;
+            expect(")");
+        } else {  // local variable
+            node->kind = ND_LVAR;
+            Lvar* lvar = find_lvar(tok);
+            if (!lvar) {  // if this is the first time for the lvar to appear
+                lvar = calloc(1, sizeof(Lvar));
+                lvar->name = tok->str;
+                lvar->len = tok->len;
+                lvar->offset = (fn->lvars->len + 1) * 8;
+                map_insert(fn->lvars, tok->str, lvar);
+            }
+            node->offset = lvar->offset;
         }
-        node->offset = lvar->offset;
         return node;
     }
 
