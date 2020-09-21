@@ -35,6 +35,8 @@ struct Token {
  * NodeKind and Node
  */
 typedef enum {
+    ND_ADDR,       // &
+    ND_DEREF,      // *
     ND_FUNC_CALL,  // function call
     ND_BLOCK,      // {}
     ND_FOR,        // for
@@ -145,7 +147,7 @@ Node *equality();    // equality = relational ("==" relational | "!=" relational
 Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node *add();         // add = mul ("+" mul | "-" mul)*
 Node *mul();         // mul = unary ("*" unary | "/" unary)*
-Node *unary();       // unary = ("+" | "-")? primary
+Node *unary();       // unary = ("+" | "-")? primary | "*" unary | "&" unary
 Node *primary();     // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
 
 /* codegen.c */

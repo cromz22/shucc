@@ -106,6 +106,15 @@ void gen(Node* node) {
             printf("  call %s\n", node->func_name);  // rax = result of calling the function
             printf("  push rax\n");                  // push rax to stack top
             return;
+        case ND_ADDR:             // e.g. &a
+            gen_lval(node->lhs);  // push a to stack top
+            return;
+        case ND_DEREF:                     // e.g. *a
+            gen(node->lhs);                // push address of a to stack top
+            printf("  pop rax\n");         // rax = address of a
+            printf("  mov rax, [rax]\n");  // rax = valud of a
+            printf("  push rax\n");        // push the value to stack top
+            return;
     }
 
     gen(node->lhs);
