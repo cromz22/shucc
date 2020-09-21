@@ -1,7 +1,8 @@
 #include "shucc.h"
 
 /* global variable */
-int label_counter = 0;  // used in if statement
+int label_counter = 0;                                       // used for if, else, and for statement
+char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for function arguments
 
 /**
  * Push the address of the node to stack top.
@@ -91,11 +92,17 @@ void gen(Node* node) {
             local_label_counter++;
             return;
         case ND_BLOCK:
-            for (int i = 0; i < node->stmts->len; i++) {
+            for (int i = 0; i < node->stmts->size; i++) {
                 gen(node->stmts->data[i]);
             }
             return;
         case ND_FUNC_CALL:
+            for (int i = 0; i < node->args->size; i++) {
+                gen(node->args->data[i]);
+            }
+            for (int i = node->args->size - 1; i >= 0; i--) {
+                printf("  pop %s\n", argregs[i]);
+            }
             printf("  call %s\n", node->func_name);  // rax = result of calling the function
             printf("  push rax\n");                  // push rax to stack top
             return;
@@ -156,7 +163,14 @@ void gen_func(Func* fn) {
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", fn->lvars->len * 8);
+    printf("  sub rsp, %d\n", fn->lvars->size * 8);
+
+    // arguments
+    for (int i = 0; i < fn->args->size; i++) {
+        Node* arg = fn->args->data[i];
+        printf("  lea rax, [rbp-%d]\n", arg->offset);
+        printf("  mov [rax], %s\n", argregs[i]);
+    }
 
     // body
     gen(fn->body);

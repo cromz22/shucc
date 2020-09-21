@@ -41,7 +41,7 @@ Vector *vec_create() {
     Vector *vec = malloc(sizeof(Vector));
     vec->data = malloc(sizeof(void *) * INITIAL_VECTOR_SIZE);
     vec->capacity = INITIAL_VECTOR_SIZE;
-    vec->len = 0;
+    vec->size = 0;
     return vec;
 }
 
@@ -52,11 +52,11 @@ Vector *vec_create() {
  * @param vec  The item is pushed to this vector
  */
 void vec_push(Vector *vec, void *item) {
-    if (vec->len == vec->capacity) {
+    if (vec->size == vec->capacity) {
         vec->capacity *= 2;
         vec->data = realloc(vec->data, sizeof(void *) * vec->capacity);
     }
-    vec->data[vec->len++] = item;
+    vec->data[vec->size++] = item;
 }
 
 /**
@@ -68,7 +68,7 @@ void vec_push(Vector *vec, void *item) {
  * @return An item.
  */
 void *vec_get(Vector *vec, int index) {
-    if (vec->len <= index) {
+    if (vec->size <= index) {
         error("IndexError: vector index out of range");
     }
     return vec->data[index];
@@ -83,7 +83,7 @@ Map *map_create() {
     Map *map = malloc(sizeof(Map));
     map->keys = vec_create();
     map->vals = vec_create();
-    map->len = 0;
+    map->size = 0;
     return map;
 }
 
@@ -95,7 +95,7 @@ Map *map_create() {
  * @param val A value.
  */
 void map_insert(Map *map, char *key, void *val) {
-    for (int i = 0; i < map->len; i++) {
+    for (int i = 0; i < map->size; i++) {
         if (strcmp(vec_get(map->keys, i), key) == 0) {
             void *old_val = vec_get(map->vals, i);
             old_val = val;
@@ -104,7 +104,7 @@ void map_insert(Map *map, char *key, void *val) {
     }
     vec_push(map->keys, key);
     vec_push(map->vals, val);
-    map->len++;
+    map->size++;
 }
 
 /**
@@ -117,7 +117,7 @@ void map_insert(Map *map, char *key, void *val) {
  * @return An item.
  */
 void *map_at(Map *map, char *key) {
-    for (int i = 0; i < map->len; i++) {
+    for (int i = 0; i < map->size; i++) {
         if (strcmp(vec_get(map->keys, i), key) == 0) {
             return vec_get(map->vals, i);
         }
@@ -210,18 +210,18 @@ void draw_node_tree(Node *node, int depth, char *role) {
                 break;
             case ND_BLOCK:
                 fprintf(stderr, "BLOCK\n");
-                for (int i = 0; i < node->stmts->len; i++) {
+                for (int i = 0; i < node->stmts->size; i++) {
                     draw_node_tree(node->stmts->data[i], depth + 1, "");
                 }
                 break;
-            // case ND_FUNC_CALL:
-            //     fprintf(stderr, "FUNC_CALL(name: %s)\n", node->name);
-            //     for (int i = 0; i < node->args->len; i++) {
-            //         char prefix[16] = {'\0'};
-            //         sprintf(prefix, "arg%d", i);
-            //         draw_node_tree(node->args->data[i], depth + 1, prefix);
-            //     }
-            //     break;
+            case ND_FUNC_CALL:
+                fprintf(stderr, "FUNC_CALL(name: %s)\n", node->func_name);
+                for (int i = 0; i < node->args->size; i++) {
+                    char prefix[16] = {'\0'};
+                    sprintf(prefix, "arg%d", i);
+                    draw_node_tree(node->args->data[i], depth + 1, prefix);
+                }
+                break;
             // case ND_GVAR:
             //     fprintf(stderr, "GVAR(name: %s)\n", node->name);
             //     break;
@@ -250,13 +250,20 @@ void draw_node_tree(Node *node, int depth, char *role) {
  *
  * @param code A program.
  */
-void draw_ast(Node **code) {
-    Node *node;
+void draw_ast(Func **code) {
     for (int i = 0; i < 100; i++) {
-        node = code[i];
-        if (node == NULL) {
+        Func *fn = code[i];
+        if (!fn) {
             break;
         }
-        draw_node_tree(node, 1, "");
+        fprintf(stderr, "%s(\n", fn->name);
+        for (int j = 0; j < fn->args->size; j++) {
+            char prefix[256] = {'\0'};
+            sprintf(prefix, "arg%d", j);
+            draw_node_tree(fn->args->data[j], 1, prefix);
+        }
+        fprintf(stderr, ")\n");
+        draw_node_tree(fn->body, 1, "");
+        fprintf(stderr, "\n");
     }
 }

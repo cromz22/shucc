@@ -67,10 +67,11 @@ struct Node {
     Node *loop;       // [FOR] third expression to update loop
     Vector *stmts;    // [BLOCK] statements inside a block
     char *func_name;  // [FUNC CALL] function name
+    Vector *args;     // [FUNC CALL] function arguments (used every time the function is called)
 };
 
 /**
- * Lvar (struct for local variables)
+ * struct for local variables
  */
 struct Lvar {
     char *name;  // variable name
@@ -78,10 +79,14 @@ struct Lvar {
     int offset;  // offset of the variable from RBP
 };
 
+/*
+ * struct for functions
+ */
 struct Func {
-    char *name;  // name of the function
-    Node *body;  // statements inside the function
-    Map *lvars;  // local variables used inside the function
+    char *name;    // name of the function
+    Node *body;    // statements inside the function
+    Map *lvars;    // local variables used inside the function
+    Vector *args;  // arguments of the function
 };
 
 /**
@@ -90,7 +95,7 @@ struct Func {
 struct Vector {
     void **data;   // contents of the vector
     int capacity;  // capacity of the vector ( >= # contents )
-    int len;       // # contents of the vector
+    int size;      // # contents of the vector
 };
 
 /**
@@ -99,7 +104,7 @@ struct Vector {
 struct Map {
     Vector *keys;  // keys
     Vector *vals;  // values
-    int len;       // # contents of the Map
+    int size;      // # contents of the Map
 };
 
 /* utils.c */
@@ -112,7 +117,7 @@ Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
 void draw_node_tree(Node *node, int depth, char *role);
-void draw_ast(Node **code);
+void draw_ast(Func **code);
 
 /* tokenize.c */
 bool consume(char *op);
@@ -128,7 +133,7 @@ Token *tokenize(char *p);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 void program();      // program = func*
-Func *func();        // func = ident "(" ")" "{" stmt* "}"
+Func *func();        // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();        // stmt = "return"? expr ";"
                      //      | "if" "(" expr ")" stmt ("else" stmt)?
                      //      | "while" "(" expr ")" stmt
@@ -141,7 +146,7 @@ Node *relational();  // relational = add ("<" add | "<=" add | ">" add | ">=" ad
 Node *add();         // add = mul ("+" mul | "-" mul)*
 Node *mul();         // mul = unary ("*" unary | "/" unary)*
 Node *unary();       // unary = ("+" | "-")? primary
-Node *primary();     // primary = "(" expr ")" | num | ident ( "(" ")" )?
+Node *primary();     // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
 
 /* codegen.c */
 void gen(Node *node);

@@ -53,10 +53,28 @@ Func* func() {
     fn->name = tok->str;
     fn->lvars = map_create();
     expect("(");
-    // TODO: read arguments
-    expect(")");
+    // read arguments
+    fn->args = vec_create();
+    while (!consume(")")) {
+        if (0 < fn->args->size) {
+            expect(",");
+        }
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+
+        Lvar* lvar = calloc(1, sizeof(Lvar));
+        tok = consume_ident();
+        lvar->name = tok->str;
+        lvar->len = tok->len;
+        lvar->offset = (fn->lvars->size + 1) * 8;
+
+        map_insert(fn->lvars, tok->str, lvar);
+
+        node->offset = lvar->offset;
+        vec_push(fn->args, node);
+    }
     expect("{");
-    // read statements
+    // read body
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_BLOCK;
     node->stmts = vec_create();
@@ -221,7 +239,14 @@ Node* primary() {
         if (consume("(")) {  // function
             node->kind = ND_FUNC_CALL;
             node->func_name = tok->str;
-            expect(")");
+            node->args = vec_create();
+            while (!consume(")")) {
+                if (0 < node->args->size) {
+                    expect(",");
+                }
+                Node* arg = expr();
+                vec_push(node->args, arg);
+            }
         } else {  // local variable
             node->kind = ND_LVAR;
             Lvar* lvar = find_lvar(tok);
@@ -229,7 +254,7 @@ Node* primary() {
                 lvar = calloc(1, sizeof(Lvar));
                 lvar->name = tok->str;
                 lvar->len = tok->len;
-                lvar->offset = (fn->lvars->len + 1) * 8;
+                lvar->offset = (fn->lvars->size + 1) * 8;
                 map_insert(fn->lvars, tok->str, lvar);
             }
             node->offset = lvar->offset;
