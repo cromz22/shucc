@@ -5,8 +5,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Token Token;
+typedef struct Node Node;
+typedef struct Lvar Lvar;
+typedef struct Vector Vector;
+typedef struct Map Map;
+
 /**
- * struct of token types
+ * TokenKind and Token
  */
 typedef enum {
     TK_IDENT,     // identifier
@@ -15,10 +21,6 @@ typedef enum {
     TK_EOF,       // end
 } TokenKind;
 
-/**
- * token struct
- */
-typedef struct Token Token;
 struct Token {
     TokenKind kind;  // token type
     Token *next;     // next token
@@ -28,7 +30,7 @@ struct Token {
 };
 
 /**
- * kind of nodes in the syntax tree
+ * NodeKind and Node
  */
 typedef enum {
     ND_BLOCK,   // {}
@@ -49,19 +51,6 @@ typedef enum {
     ND_NUM,     // integer
 } NodeKind;
 
-/**
- * definition of Vector (~ array in Python)
- */
-typedef struct {
-    void **data;   // contents of the vector
-    int capacity;  // capacity of the vector ( >= # contents )
-    int len;       // # contents of the vector
-} Vector;
-
-/**
- * definition of node
- */
-typedef struct Node Node;
 struct Node {
     NodeKind kind;  // kind of the node
     Node *lhs;      // left child
@@ -77,22 +66,31 @@ struct Node {
 };
 
 /**
- * definition of Map (~ dictionary in Python)
+ * Lvar (struct for local variables)
  */
-typedef struct {
-    Vector *keys;
-    Vector *vals;
-    int len;
-} Map;
+struct Lvar {
+    char *name;  // variable name
+    int len;     // length of the name
+    int offset;  // offset of the variable from RBP
+};
 
 /**
- * definition of Lvar (struct for local variables)
+ * Vector (~ array in Python)
  */
-typedef struct Lvar {
-    char *name;
-    int len;
-    int offset;
-} Lvar;
+struct Vector {
+    void **data;   // contents of the vector
+    int capacity;  // capacity of the vector ( >= # contents )
+    int len;       // # contents of the vector
+};
+
+/**
+ * Map (~ dictionary in Python)
+ */
+struct Map {
+    Vector *keys;  // keys
+    Vector *vals;  // values
+    int len;       // # contents of the Map
+};
 
 /* utils.c */
 void error(char *fmt, ...);
