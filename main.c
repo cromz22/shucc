@@ -3,7 +3,7 @@
 /* global variables */
 char* user_input;  // input program
 Token* token;      // current token
-Vector* code;      // top-level array of statements
+Map* code;         // top-level array of statements
 
 /**
  * Print out each token str
@@ -31,17 +31,27 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    token = tokenize(argv[1]);  // tokenize the given string and initialize token by the first one
-    // check_tokenization(argv);
-    // fprintf(stderr, "tokenize OK\n");
+    int debug = 0;
+    if (debug) {
+        token = tokenize(argv[1]);
+        check_tokenization(argv);
+        fprintf(stderr, "tokenize OK\n");
 
-    code = program();  // generate AST from input
-    // draw_ast();
-    // fprintf(stderr, "AST OK\n");
+        code = program();
+        fprintf(stderr, "AST OK\n");
+        draw_ast();
+        fprintf(stderr, "draw AST OK\n");
 
-    sema();
+        sema();
+        fprintf(stderr, "sema OK");
 
-    gen_x86_64();
+        gen_x86_64();
+    } else {
+        token = tokenize(argv[1]);  // tokenize the given string and initialize token by the first one
+        code = program();           // generate AST from input
+        sema();
+        gen_x86_64();
+    }
 
     return 0;
 }

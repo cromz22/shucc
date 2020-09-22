@@ -10,8 +10,8 @@ char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for fu
  */
 void gen_lval(Node* node) {
     printf("  mov rax, rbp\n");  // rbp must not be moved while the function is executed, so copy it (address) to rax
-    printf("  sub rax, %d\n", node->offset);  // shift rax (address) by the offset of the node
-    printf("  push rax\n");                   // push the shifted address to the stack top
+    printf("  sub rax, %d\n", node->lvar->offset);  // shift rax (address) by the offset of the node
+    printf("  push rax\n");                         // push the shifted address to the stack top
 }
 
 /**
@@ -172,15 +172,22 @@ void gen_func(Func* fn) {
     printf(".global %s\n", fn->name);
     printf("%s:\n", fn->name);
 
+    int offset = 0;
+    for (int i = 0; i < fn->lvars->size; i++) {
+        Lvar* lvar = vec_get(fn->lvars->vals, i);
+        offset += lvar->type->type_size;
+        lvar->offset = offset;
+    }
+
     // prologue (reserve space for local variables)
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, %d\n", fn->lvars->size * 8);
+    printf("  sub rsp, %d\n", offset);
 
     // arguments
     for (int i = 0; i < fn->args->size; i++) {
-        Node* arg = fn->args->data[i];
-        printf("  lea rax, [rbp-%d]\n", arg->offset);
+        Node* arg = vec_get(fn->args, i);
+        printf("  lea rax, [rbp-%d]\n", arg->lvar->offset);
         printf("  mov [rax], %s\n", argregs[i]);
     }
 
@@ -201,7 +208,7 @@ void gen_x86_64() {
 
     Func* fn;
     for (int i = 0; i < code->size; i++) {
-        fn = vec_get(code, i);
+        fn = vec_get(code->vals, i);
         gen_func(fn);
     }
 }

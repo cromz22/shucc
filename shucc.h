@@ -63,7 +63,6 @@ struct Node {
     Node *lhs;        // left child
     Node *rhs;        // right child
     int val;          // leaf node (integer)
-    int offset;       // offset of variables (from RBP)
     Node *cond;       // [IF, WHILE, FOR] condition
     Node *then;       // [IF, WHILE, FOR] statement
     Node *els;        // [IF] else statement
@@ -73,6 +72,8 @@ struct Node {
     char *func_name;  // [FUNC CALL] function name
     Vector *args;     // [FUNC CALL] function arguments (used every time the function is called)
     Type *type;       // e.g. int x; x + 3; => type of x + 3 aka type of this ND_ADD is int
+    Lvar *lvar;       // to decide which lvar current node is
+    Func *func;       // to access return type
 };
 
 /**
@@ -86,6 +87,7 @@ typedef enum {
 struct Type {
     TypeKind kind;
     Type *ptr_to;
+    int type_size;
 };
 
 /**
@@ -95,6 +97,7 @@ struct Lvar {
     char *name;  // variable name
     int len;     // length of the name
     int offset;  // offset of the variable from RBP
+    Type *type;  // type of the variable
 };
 
 /*
@@ -153,9 +156,15 @@ Token *tokenize(char *p);
 /* parse.c */
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Lvar *find_lvar(Token *tok);
+Type *read_type();
+Type *new_ty(TypeKind kind, int size);
+Type *new_ty_int();
+Type *new_ty_ptr(Type *dest);
+
 Node *declaration();  // declaration = "int" ident
-Vector *program();    // program = func*
-Func *func();         // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
+Map *program();       // program = func*
+void func();          // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
                       //      | "while" "(" expr ")" stmt
@@ -180,4 +189,4 @@ void gen_x86_64();
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Vector *code;      // top-level array of statements
+extern Map *code;         // top-level array of statements

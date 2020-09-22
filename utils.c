@@ -240,7 +240,8 @@ void draw_node_tree(Node *node, int depth, char *role) {
             //     fprintf(stderr, "GVAR(name: %s)\n", node->name);
             //     break;
             case ND_LVAR:
-                fprintf(stderr, "LVAR(offset: %d)\n", node->offset);
+                fprintf(stderr, "LVAR\n");
+                // fprintf(stderr, "LVAR(offset: %d)\n", node->lvar->offset);
                 break;
             case ND_NUM:
                 fprintf(stderr, "NUM(%d)\n", node->val);
@@ -264,7 +265,7 @@ void draw_node_tree(Node *node, int depth, char *role) {
  */
 void draw_ast() {
     for (int i = 0; i < code->size; i++) {
-        Func *fn = vec_get(code, i);
+        Func *fn = vec_get(code->vals, i);
         if (!fn) {
             break;
         }

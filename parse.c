@@ -25,6 +25,7 @@ Node* new_node_num(int val) {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+    node->type = new_ty_int();
     return node;
 }
 
@@ -39,18 +40,47 @@ Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
  * @return read type
  */
 Type* read_type() {
-    Type* type = calloc(1, sizeof(Type));
+    Type* type;
     if (consume("int")) {
-        type->kind = TY_INT;
+        type = new_ty_int();
     } else {
         error("No such type");
     }
     while (consume("*")) {
-        Type* ptr = calloc(1, sizeof(Type));
-        ptr->kind = TY_PTR;
-        ptr->ptr_to = type;
-        type = ptr;
+        type = new_ty_ptr(type);
     }
+    return type;
+}
+
+/**
+ * Create a new Type instance
+ * @param kind  type kind of the new instance
+ * @param size  type size of the new instance (e.g. 4 if int)
+ * @return      created instance
+ */
+Type* new_ty(TypeKind kind, int size) {
+    Type* type = calloc(1, sizeof(Type));  // calloc of Type is done only in this function
+    type->kind = kind;
+    type->type_size = size;
+    return type;
+}
+
+/**
+ * Create a new int type instance
+ * @return  created int instance
+ */
+Type* new_ty_int() {
+    return new_ty(TY_INT, 8);  // TODO: 4
+}
+
+/**
+ * Create a new pointer type instance
+ * @param dest  destination of the pointer (e.g. int if int*)
+ * @return      created pointer instance
+ */
+Type* new_ty_ptr(Type* dest) {
+    Type* type = new_ty(TY_PTR, 8);
+    type->ptr_to = dest;
     return type;
 }
 
@@ -59,32 +89,32 @@ Type* read_type() {
 Node* declaration() {
     Type* type = read_type();
 
-    Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
-
     Lvar* lvar = calloc(1, sizeof(Lvar));
     Token* tok = consume_ident();
     lvar->name = tok->str;
     lvar->len = tok->len;
-    lvar->offset = (fn->lvars->size + 1) * 8;
+    lvar->type = type;
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+    node->lvar = lvar;
+    node->type = type;
 
     map_insert(fn->lvars, tok->str, lvar);
-
-    node->offset = lvar->offset;
 
     return node;
 }
 
-Vector* program() {
+Map* program() {
     // fprintf(stderr, "hello from program\n");
-    code = vec_create();
+    code = map_create();
     while (token->kind != TK_EOF) {
-        vec_push(code, func());  // inside func tokens are updated
+        func();  // inside func tokens are updated
     }
     return code;
 }
 
-Func* func() {
+void func() {
     // fprintf(stderr, "hello from func\n");
     Type* type = read_type();
     Token* tok = consume_ident();
@@ -105,6 +135,9 @@ Func* func() {
         }
         vec_push(fn->args, declaration());
     }
+
+    map_insert(code, fn->name, fn);
+
     expect("{");
     // read body
     Node* node = calloc(1, sizeof(Node));
@@ -114,7 +147,6 @@ Func* func() {
         vec_push(node->stmts, (void*)stmt());
     }
     fn->body = node;
-    return fn;
 }
 
 Node* stmt() {
@@ -278,7 +310,12 @@ Node* primary() {
     if (tok) {
         node = calloc(1, sizeof(Node));
         if (consume("(")) {  // function
+            Func* fn = map_at(code, tok->str);
+            if (!fn) {
+                error("function '%s' is not defined", tok->str);
+            }
             node->kind = ND_FUNC_CALL;
+            node->func = fn;
             node->func_name = tok->str;
             node->args = vec_create();
             while (!consume(")")) {
@@ -292,13 +329,9 @@ Node* primary() {
             node->kind = ND_LVAR;
             Lvar* lvar = find_lvar(tok);
             if (!lvar) {  // if this is the first time for the lvar to appear
-                lvar = calloc(1, sizeof(Lvar));
-                lvar->name = tok->str;
-                lvar->len = tok->len;
-                lvar->offset = (fn->lvars->size + 1) * 8;
-                map_insert(fn->lvars, tok->str, lvar);
+                error("lvar not defined");
             }
-            node->offset = lvar->offset;
+            node->lvar = lvar;
         }
         return node;
     }
