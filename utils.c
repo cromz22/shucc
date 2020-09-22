@@ -247,12 +247,10 @@ void draw_node_tree(Node *node, int depth, char *role) {
 
 /**
  * Draws the abstract syntax tree of a program.
- *
- * @param code A program.
  */
-void draw_ast(Func **code) {
-    for (int i = 0; i < 100; i++) {
-        Func *fn = code[i];
+void draw_ast() {
+    for (int i = 0; i < code->size; i++) {
+        Func *fn = vec_get(code, i);
         if (!fn) {
             break;
         }

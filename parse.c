@@ -1,6 +1,6 @@
 #include "shucc.h"
 
-/* global variable */
+/* global variable used inside parse.c */
 Func* fn;  // function now being parsed
 
 /*
@@ -75,16 +75,17 @@ Node* declaration() {
     return node;
 }
 
-void program() {
-    int i = 0;
-    while (!at_eof()) {
-        code[i] = func();
-        i++;
+Vector* program() {
+    // fprintf(stderr, "hello from program\n");
+    code = vec_create();
+    while (token->kind != TK_EOF) {
+        vec_push(code, func());  // inside func tokens are updated
     }
-    code[i] = NULL;
+    return code;
 }
 
 Func* func() {
+    // fprintf(stderr, "hello from func\n");
     Type* type = read_type();
     Token* tok = consume_ident();
     if (!tok) {

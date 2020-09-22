@@ -1,6 +1,6 @@
 #include "shucc.h"
 
-/* global variable */
+/* global variables used inside codegen.c */
 int label_counter = 0;                                       // used for if, else, and for statement
 char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for function arguments
 
@@ -194,17 +194,14 @@ void gen_func(Func* fn) {
 }
 
 /**
- * generate x86 specific assembly
+ * generate x86_64 specific assembly
  */
-void gen_x86() {
+void gen_x86_64() {
     printf(".intel_syntax noprefix\n");
 
-    Func* func;
-    for (int i = 0; i < 100; i++) {
-        func = code[i];
-        if (!func) {
-            break;
-        }
-        gen_func(func);
+    Func* fn;
+    for (int i = 0; i < code->size; i++) {
+        fn = vec_get(code, i);
+        gen_func(fn);
     }
 }

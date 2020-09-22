@@ -3,7 +3,22 @@
 /* global variables */
 char* user_input;  // input program
 Token* token;      // current token
-Func* code[100];   // top-level array of statements
+Vector* code;      // top-level array of statements
+
+/**
+ * Print out each token str
+ * @param argv  a string array of arguments
+ */
+void check_tokenization(char** argv) {
+    token = tokenize(argv[1]);
+    while (token->kind != TK_EOF) {
+        fprintf(stderr, "%s ", token->str);
+        token = token->next;
+    }
+    fprintf(stderr, "\n");
+    // now token is the last one, need to update token
+    token = tokenize(argv[1]);
+}
 
 /**
  * main function
@@ -17,13 +32,14 @@ int main(int argc, char** argv) {
     }
 
     token = tokenize(argv[1]);  // tokenize the given string and initialize token by the first one
+    // check_tokenization(argv);
     // fprintf(stderr, "tokenize OK\n");
-    program();  // generate AST from input
+
+    code = program();  // generate AST from input
+    // draw_ast();
     // fprintf(stderr, "AST OK\n");
 
-    // draw_ast(code);
-
-    gen_x86();
+    gen_x86_64();
 
     return 0;
 }

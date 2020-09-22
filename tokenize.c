@@ -63,12 +63,6 @@ bool peek(char *op) {
 }
 
 /**
- * See if the current token is EOF.
- * @return bool  true if EOF
- */
-bool at_eof() { return token->kind == TK_EOF; }
-
-/**
  * Create a new token tok, which is the next token of cur, and returns it.
  * @param  kind  kind of the new token
  * @param  cur   current token

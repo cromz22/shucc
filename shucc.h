@@ -135,7 +135,7 @@ Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
 void draw_node_tree(Node *node, int depth, char *role);
-void draw_ast(Func **code);
+void draw_ast();
 
 /* tokenize.c */
 bool consume(char *op);
@@ -152,7 +152,7 @@ Token *tokenize(char *p);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *declaration();  // declaration = "int" ident
-void program();       // program = func*
+Vector *program();    // program = func*
 Func *func();         // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
@@ -170,10 +170,9 @@ Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
 Node *primary();      // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
 
 /* codegen.c */
-void gen(Node *node);
-void gen_x86();
+void gen_x86_64();
 
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Func *code[100];   // top-level array of statements
+extern Vector *code;      // top-level array of statements
