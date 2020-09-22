@@ -39,6 +39,8 @@ int main(int argc, char** argv) {
     // draw_ast();
     // fprintf(stderr, "AST OK\n");
 
+    sema();
+
     gen_x86_64();
 
     return 0;

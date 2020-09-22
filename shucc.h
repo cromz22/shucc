@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -131,6 +132,7 @@ void error_at(char *loc, char *fmt, ...);
 Vector *vec_create();
 void vec_push(Vector *vec, void *elem);
 void *vec_get(Vector *vec, int key);
+void *vec_set(Vector *vec, int index, void *item);
 Map *map_create();
 void map_insert(Map *map, char *key, void *val);
 void *map_at(Map *map, char *key);
@@ -168,6 +170,9 @@ Node *add();          // add = mul ("+" mul | "-" mul)*
 Node *mul();          // mul = unary ("*" unary | "/" unary)*
 Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
 Node *primary();      // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
+
+/* sema.c */
+void sema();
 
 /* codegen.c */
 void gen_x86_64();

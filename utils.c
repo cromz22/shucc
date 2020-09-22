@@ -75,6 +75,20 @@ void *vec_get(Vector *vec, int index) {
 }
 
 /**
+ * Sets an item to the vector at the index
+ * @param vec    the vector item is set to
+ * @param index  index of the vector item is set to
+ * @param item   item to be set
+ * @return       the item set
+ */
+void *vec_set(Vector *vec, int index, void *item) {
+    if (index >= vec->size) {
+        return NULL;
+    }
+    vec->data[index] = item;
+    return item;
+}
+/**
  * Creates an empty map.
  *
  * @return A map.
