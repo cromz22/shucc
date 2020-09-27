@@ -125,11 +125,11 @@ Node* declaration() {
 
 Map* program() {
     // fprintf(stderr, "hello from program\n");
-    code = map_create();
+    funcs = map_create();
     while (token->kind != TK_EOF) {
         func();  // inside func tokens are updated
     }
-    return code;
+    return funcs;
 }
 
 void func() {
@@ -154,7 +154,7 @@ void func() {
         vec_push(fn->args, declaration());
     }
 
-    map_insert(code, fn->name, fn);
+    map_insert(funcs, fn->name, fn);
 
     expect("{");
     // read body
@@ -346,7 +346,7 @@ Node* primary() {
     if (tok) {
         node = calloc(1, sizeof(Node));
         if (consume("(")) {  // function
-            Func* fn = map_at(code, tok->str);
+            Func* fn = map_at(funcs, tok->str);
             if (!fn) {
                 error("function '%s' is not defined", tok->str);
             }

@@ -186,8 +186,8 @@ Node* walk(Node* node) { return do_walk(node, true); }
 Node* walk_nodecay(Node* node) { return do_walk(node, false); }
 
 void sema() {
-    for (int i = 0; i < code->size; i++) {
-        Func* fn = vec_get(code->vals, i);
+    for (int i = 0; i < funcs->size; i++) {
+        Func* fn = vec_get(funcs->vals, i);
         fn->body = walk(fn->body);
     }
 }

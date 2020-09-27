@@ -166,7 +166,7 @@ Type *new_ty_int();
 Type *new_ty_ptr(Type *dest);
 
 Node *declaration();  // declaration = "int" ident ("[" expr "]")?
-Map *program();       // program = func*
+Map *program();       // program = func* | gvar*
 void func();          // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
@@ -195,4 +195,5 @@ void gen_x86_64();
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Map *code;         // top-level array of statement
+extern Map *funcs;        // functions
+extern Map *gvars;        // global variables

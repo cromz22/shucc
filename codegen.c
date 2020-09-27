@@ -207,8 +207,8 @@ void gen_x86_64() {
     printf(".intel_syntax noprefix\n");
 
     Func* fn;
-    for (int i = 0; i < code->size; i++) {
-        fn = vec_get(code->vals, i);
+    for (int i = 0; i < funcs->size; i++) {
+        fn = vec_get(funcs->vals, i);
         gen_func(fn);
     }
 }
