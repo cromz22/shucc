@@ -91,7 +91,7 @@ Type* new_ty_ptr(Type* dest) {
  */
 Type* new_ty_array(Type* dest, int num) {
     Type* type = new_ty(TY_ARRAY, num * dest->type_size);
-    fprintf(stderr, "type->type_size: %d\n", type->type_size);
+    // fprintf(stderr, "type->type_size: %d\n", type->type_size);
     type->ptr_to = dest;
     type->array_size = num;
     return type;
@@ -185,6 +185,7 @@ Node* stmt() {
         node->kind = ND_RETURN;
         node->lhs = expr();
         if (!consume(";")) {
+            // fprintf(stderr, "hello from stmt return\n");
             error("';' is expected");
         }
     } else if (consume("if")) {
@@ -300,10 +301,10 @@ Node* mul() {
 
 Node* unary() {
     if (consume("+")) {
-        return primary();
+        return postfix();
     }
     if (consume("-")) {
-        return new_node(ND_SUB, new_node_num(0), primary());
+        return new_node(ND_SUB, new_node_num(0), postfix());
     }
     if (consume("&")) {
         return new_node(ND_ADDR, unary(), NULL);
@@ -314,7 +315,21 @@ Node* unary() {
     if (consume("sizeof")) {
         return new_node(ND_SIZEOF, unary(), NULL);
     }
-    return primary();
+    return postfix();
+}
+
+Node* postfix() {
+    Node* node = primary();
+    while (true) {
+        if (consume("[")) {
+            Node* expression = expr();
+            expect("]");
+            Node* sum = new_node(ND_ADD, node, expression);
+            node = new_node(ND_DEREF, sum, NULL);
+        } else {
+            return node;
+        }
+    }
 }
 
 Node* primary() {
@@ -359,18 +374,4 @@ Node* primary() {
 
     // case primary = num
     return new_node_num(expect_number());
-}
-
-Node* postfix() {
-    Node* node = primary();
-    while (true) {
-        if (consume("[")) {
-            Node* expression = expr();
-            expect("]");
-            Node* sum = new_node(ND_ADD, node, expression);
-            node = new_node(ND_DEREF, sum, NULL);
-        } else {
-            return node;
-        }
-    }
 }
