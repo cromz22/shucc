@@ -293,6 +293,9 @@ Node* unary() {
     if (consume("*")) {
         return new_node(ND_DEREF, unary(), NULL);
     }
+    if (consume("sizeof")) {
+        return new_node(ND_SIZEOF, unary(), NULL);
+    }
     return primary();
 }
 

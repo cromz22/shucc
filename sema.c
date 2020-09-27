@@ -40,6 +40,9 @@ Node* walk(Node* node) {
     // fprintf(stderr, "hello from walk!\n");
     assert(node && "Cannot walk on NULL node");
     switch (node->kind) {
+        case ND_SIZEOF:
+            node->lhs = walk(node->lhs);
+            return new_node_num(node->lhs->type->type_size);
         case ND_ADDR:
             node->lhs = walk(node->lhs);
             check_referable(node->lhs);
