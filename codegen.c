@@ -8,10 +8,32 @@ char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for fu
  * Push the address of the node to stack top.
  * @param node  variable to be pushed
  */
+// void gen_lval(Node* node) {
+//     printf("  mov rax, rbp\n");  // rbp must not be moved while the function is executed, so copy it (address) to rax
+//     printf("  sub rax, %d\n", node->lvar->offset);  // shift rax (address) by the offset of the node
+//     printf("  push rax\n");                         // push the shifted address to the stack top
+// }
 void gen_lval(Node* node) {
-    printf("  mov rax, rbp\n");  // rbp must not be moved while the function is executed, so copy it (address) to rax
-    printf("  sub rax, %d\n", node->lvar->offset);  // shift rax (address) by the offset of the node
-    printf("  push rax\n");                         // push the shifted address to the stack top
+    switch (node->kind) {
+        case ND_LVAR:
+            printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
+            printf("  push rax\n");
+            break;
+        case ND_GVAR:
+            printf("  lea rax, %s\n", node->gvar->name);
+            printf("  push rax\n");
+            break;
+        case ND_DEREF:
+            gen(node->lhs);
+            break;
+        default:
+            error("unexpected node kind '%s'", node->kind);
+    }
+}
+
+void gen_gvar(Gvar* gvar) {
+    printf("%s:\n", gvar->name);
+    printf("  .zero %d\n", gvar->type->type_size);
 }
 
 /**
@@ -25,14 +47,15 @@ void gen(Node* node) {
         case ND_NUM:
             printf("  push %d\n", node->val);
             return;
-        case ND_LVAR:                      // e.g. x
-            gen_lval(node);                // push address of x to stack top
-            printf("  pop rax\n");         // rax = address of x
-            printf("  mov rax, [rax]\n");  // rax = value of x
-            printf("  push rax\n");        // push value of x to stack
+        case ND_LVAR:
+        case ND_GVAR:
+            gen_lval(node);
+            printf("  pop rax\n");
+            printf("  mov rax, [rax]\n");
+            printf("  push rax\n");
             return;
         case ND_ASSIGN:
-            if (node->lhs->kind == ND_LVAR) {
+            if (node->lhs->kind == ND_LVAR || node->lhs->kind == ND_GVAR) {
                 gen_lval(node->lhs);
             } else if (node->lhs->kind == ND_DEREF) {
                 gen(node->lhs->lhs);  // e.g. x: some address, node->lhs: *x, node->lhs->lhs: x
@@ -206,6 +229,13 @@ void gen_func(Func* fn) {
 void gen_x86_64() {
     printf(".intel_syntax noprefix\n");
 
+    printf(".data\n");
+    for (int i = 0; i < gvars->size; i++) {
+        gen_gvar(vec_get(gvars->vals, i));
+    }
+
+    printf("\n");
+    printf(".text\n");
     Func* fn;
     for (int i = 0; i < funcs->size; i++) {
         fn = vec_get(funcs->vals, i);

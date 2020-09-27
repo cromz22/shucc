@@ -4,7 +4,7 @@ assert() {
 	input="$2"
 
 	./shucc "$input" > tmp.s
-	cc -o tmp tmp.s
+	cc -static -o tmp tmp.s
 	./tmp
 	actual="$?"
 
@@ -69,7 +69,7 @@ assert 3 "int main() { int a[2]; *a = 1; *(a + 1) = 2; return a[0] + a[1]; }"
 assert 3 "int main() { int a[2]; *a = 1; *(a + 1) = 2; return 0[a] + 1[a]; }"
 assert 42 "int gvar; int main() { return 42; }"
 assert 42 "int gvar[3]; int main() { return 42; }"
-# assert 42 "int gvar; int main() { gvar = 42; return gvar; }"
-# assert 3 "int gvar; int increment() { gvar = gvar + 1; return 0; } int main() { gvar = 0; while (gvar < 3) {increment();} return gvar; }"
+assert 42 "int gvar; int main() { gvar = 42; return gvar; }"
+assert 3 "int gvar; int increment() { gvar = gvar + 1; return 0; } int main() { gvar = 0; while (gvar < 3) {increment();} return gvar; }"
 
 echo OK

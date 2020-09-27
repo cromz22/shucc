@@ -29,12 +29,6 @@ Node* new_node_num(int val) {
     return node;
 }
 
-/*
- * Check if there is a local variable whose name is tok.
- * @param tok  token to be checked
- */
-Lvar* find_lvar(Token* tok) { return map_at(fn->lvars, tok->str); }
-
 /**
  * Read type.
  * @return read type
@@ -148,12 +142,11 @@ void func_or_gvar() {
         error("Unexpected token");
     }
 
-    fn = calloc(1, sizeof(Func));
-    fn->name = tok->str;
-    fn->return_type = type;
-    fn->lvars = map_create();
-
     if (consume("(")) {  // funcs
+        fn = calloc(1, sizeof(Func));
+        fn->name = tok->str;
+        fn->return_type = type;
+        fn->lvars = map_create();
         // read arguments
         fn->args = vec_create();
         while (!consume(")")) {
@@ -175,15 +168,22 @@ void func_or_gvar() {
         }
         fn->body = node;
     } else {  // gvars
-        if (map_at(gvars, fn->name)) {
-            error("global variable '%s' is already defined", fn->name);
+        if (map_at(gvars, tok->str)) {
+            error("global variable '%s' is already defined", tok->str);
         }
         if (consume("[")) {
             type = new_ty_array(type, expect_number());
             expect("]");
         }
-        Node* node = new_node_gvar(fn->name, type);
-        map_insert(gvars, fn->name, node);
+        Gvar* gv = calloc(1, sizeof(Gvar));
+        gv->name = tok->str;
+        gv->len = tok->len;
+        gv->type = type;
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_GVAR;
+        node->gvar = gv;
+
+        map_insert(gvars, tok->str, gv);
         expect(";");
     }
 }
@@ -383,12 +383,18 @@ Node* primary() {
                 vec_push(node->args, arg);
             }
         } else {  // local variable
-            node->kind = ND_LVAR;
-            Lvar* lvar = find_lvar(tok);
-            if (!lvar) {  // if this is the first time for the lvar to appear
-                error("lvar not defined");
+            Lvar* lvar = map_at(fn->lvars, tok->str);
+            if (lvar) {
+                node->kind = ND_LVAR;
+                node->lvar = lvar;
+            } else {
+                Gvar* gvar = map_at(gvars, tok->str);
+                if (!gvar) {
+                    error("variable '%s' is not defined", tok->str);
+                }
+                node->kind = ND_GVAR;
+                node->gvar = gvar;
             }
-            node->lvar = lvar;
         }
         return node;
     }

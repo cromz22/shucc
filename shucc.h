@@ -10,6 +10,7 @@ typedef struct Token Token;
 typedef struct Node Node;
 typedef struct Type Type;
 typedef struct Lvar Lvar;
+typedef struct Gvar Gvar;
 typedef struct Func Func;
 
 typedef struct Vector Vector;
@@ -76,6 +77,7 @@ struct Node {
     Type *type;       // e.g. int x; x + 3; => type of x + 3 aka type of this ND_ADD is int
     Lvar *lvar;       // to decide which lvar current node is
     Func *func;       // to access return type
+    Gvar *gvar;
 };
 
 /**
@@ -102,6 +104,15 @@ struct Lvar {
     int len;     // length of the name
     int offset;  // offset of the variable from RBP
     Type *type;  // type of the variable
+};
+
+/**
+ * struct for global variables
+ */
+struct Gvar {
+    char *name;
+    int len;
+    Type *type;
 };
 
 /*

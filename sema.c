@@ -22,7 +22,7 @@ bool same_type(Type* x, Type* y) {
  */
 void check_referable(Node* node) {
     NodeKind kind = node->kind;
-    assert((kind == ND_LVAR || kind == ND_DEREF) && "Not referable");
+    assert((kind == ND_LVAR || kind == ND_GVAR || kind == ND_DEREF) && "Not referable");
 }
 
 /**
@@ -48,7 +48,7 @@ Node* ary_to_ptr(Node* base) {
  * @param decay  true if convert array to pointer
  */
 Node* do_walk(Node* node, bool decay) {
-    // fprintf(stderr, "hello from walk!\n");
+    // fprintf(stderr, "hello from do_walk!\n");
     assert(node && "Cannot walk on NULL node");
     switch (node->kind) {
         case ND_SIZEOF:
@@ -108,6 +108,12 @@ Node* do_walk(Node* node, bool decay) {
         case ND_LVAR:
             // fprintf(stderr, "walking ND_LVAR\n");
             node->type = node->lvar->type;
+            if (decay) {
+                node = ary_to_ptr(node);
+            }
+            return node;
+        case ND_GVAR:
+            node->type = node->gvar->type;
             if (decay) {
                 node = ary_to_ptr(node);
             }
@@ -186,6 +192,7 @@ Node* walk(Node* node) { return do_walk(node, true); }
 Node* walk_nodecay(Node* node) { return do_walk(node, false); }
 
 void sema() {
+    // fprintf(stderr, "hello from sema\n");
     for (int i = 0; i < funcs->size; i++) {
         Func* fn = vec_get(funcs->vals, i);
         fn->body = walk(fn->body);
