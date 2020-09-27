@@ -37,6 +37,7 @@ struct Token {
  * NodeKind and Node
  */
 typedef enum {
+    ND_GVAR,       // global variable
     ND_SIZEOF,     // sizeof
     ND_ADDR,       // &
     ND_DEREF,      // *
@@ -167,7 +168,7 @@ Type *new_ty_ptr(Type *dest);
 
 Node *declaration();  // declaration = "int" ident ("[" expr "]")?
 Map *program();       // program = func* | gvar*
-void func();          // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
+void func_or_gvar();  // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
                       //      | "while" "(" expr ")" stmt

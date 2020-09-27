@@ -97,6 +97,13 @@ Type* new_ty_array(Type* dest, int num) {
     return type;
 }
 
+Node* new_node_gvar(char* name, Type* type) {
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_GVAR;
+    node->func_name = name;
+    node->type = type;
+}
+
 /* grammatical functions */
 
 Node* declaration() {
@@ -126,13 +133,14 @@ Node* declaration() {
 Map* program() {
     // fprintf(stderr, "hello from program\n");
     funcs = map_create();
+    gvars = map_create();
     while (token->kind != TK_EOF) {
-        func();  // inside func tokens are updated
+        func_or_gvar();  // inside func tokens are updated
     }
     return funcs;
 }
 
-void func() {
+void func_or_gvar() {
     // fprintf(stderr, "hello from func\n");
     Type* type = read_type();
     Token* tok = consume_ident();
@@ -144,27 +152,40 @@ void func() {
     fn->name = tok->str;
     fn->return_type = type;
     fn->lvars = map_create();
-    expect("(");
-    // read arguments
-    fn->args = vec_create();
-    while (!consume(")")) {
-        if (0 < fn->args->size) {
-            expect(",");
+
+    if (consume("(")) {  // funcs
+        // read arguments
+        fn->args = vec_create();
+        while (!consume(")")) {
+            if (0 < fn->args->size) {
+                expect(",");
+            }
+            vec_push(fn->args, declaration());
         }
-        vec_push(fn->args, declaration());
-    }
 
-    map_insert(funcs, fn->name, fn);
+        map_insert(funcs, fn->name, fn);
 
-    expect("{");
-    // read body
-    Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_BLOCK;
-    node->stmts = vec_create();
-    while (!consume("}")) {
-        vec_push(node->stmts, (void*)stmt());
+        expect("{");
+        // read body
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        node->stmts = vec_create();
+        while (!consume("}")) {
+            vec_push(node->stmts, (void*)stmt());
+        }
+        fn->body = node;
+    } else {  // gvars
+        if (map_at(gvars, fn->name)) {
+            error("global variable '%s' is already defined", fn->name);
+        }
+        if (consume("[")) {
+            type = new_ty_array(type, expect_number());
+            expect("]");
+        }
+        Node* node = new_node_gvar(fn->name, type);
+        map_insert(gvars, fn->name, node);
+        expect(";");
     }
-    fn->body = node;
 }
 
 Node* stmt() {
