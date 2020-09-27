@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "draw AST OK\n");
 
         sema();
-        fprintf(stderr, "sema OK");
+        fprintf(stderr, "sema OK\n");
 
         gen_x86_64();
     } else {

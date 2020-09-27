@@ -83,12 +83,14 @@ struct Node {
 typedef enum {
     TY_INT,
     TY_PTR,
+    TY_ARRAY,
 } TypeKind;
 
 struct Type {
     TypeKind kind;
     Type *ptr_to;
     int type_size;
+    size_t array_size;  // used when kind == TY_ARRAY
 };
 
 /**
@@ -163,7 +165,7 @@ Type *new_ty(TypeKind kind, int size);
 Type *new_ty_int();
 Type *new_ty_ptr(Type *dest);
 
-Node *declaration();  // declaration = "int" ident
+Node *declaration();  // declaration = "int" ident ("[" expr "]")?
 Map *program();       // program = func*
 void func();          // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
@@ -180,8 +182,11 @@ Node *add();          // add = mul ("+" mul | "-" mul)*
 Node *mul();          // mul = unary ("*" unary | "/" unary)*
 Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary | "sizeof" unary
 Node *primary();      // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
+Node *postfix();      // postfix = primary ("[" expr "]")*
 
 /* sema.c */
+Node *walk(Node *node);
+Node *walk_nodecay(Node *node);
 void sema();
 
 /* codegen.c */

@@ -84,6 +84,19 @@ Type* new_ty_ptr(Type* dest) {
     return type;
 }
 
+/**
+ * Create a new array type instance
+ * @param dest  destination of the pointer (e.g. int if int*)
+ * @return      created pointer instance
+ */
+Type* new_ty_array(Type* dest, int num) {
+    Type* type = new_ty(TY_ARRAY, num * dest->type_size);
+    fprintf(stderr, "type->type_size: %d\n", type->type_size);
+    type->ptr_to = dest;
+    type->array_size = num;
+    return type;
+}
+
 /* grammatical functions */
 
 Node* declaration() {
@@ -98,7 +111,12 @@ Node* declaration() {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
     node->lvar = lvar;
-    node->type = type;
+
+    if (consume("[")) {
+        int num = expect_number();
+        lvar->type = new_ty_array(type, num);
+        expect("]");
+    }
 
     map_insert(fn->lvars, tok->str, lvar);
 
@@ -341,4 +359,18 @@ Node* primary() {
 
     // case primary = num
     return new_node_num(expect_number());
+}
+
+Node* postfix() {
+    Node* node = primary();
+    while (true) {
+        if (consume("[")) {
+            Node* expression = expr();
+            expect("]");
+            Node* sum = new_node(ND_ADD, node, expression);
+            node = new_node(ND_DEREF, sum, NULL);
+        } else {
+            return node;
+        }
+    }
 }

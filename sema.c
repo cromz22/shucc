@@ -33,15 +33,26 @@ void check_int(Node* node) {
     assert(ty == TY_INT && "Not an integer");
 }
 
+Node* ary_to_ptr(Node* base) {
+    if (base->type->kind != TY_ARRAY) {
+        return base;
+    }
+    Node* node = new_node(ND_ADDR, base, NULL);
+    node->type = new_ty_ptr(base->type->ptr_to);
+    return node;
+}
+
 /**
  * Add a type to a node (except for a leaf node)
+ * @param node   type is add to this node
+ * @param decay  true if convert array to pointer
  */
-Node* walk(Node* node) {
+Node* do_walk(Node* node, bool decay) {
     // fprintf(stderr, "hello from walk!\n");
     assert(node && "Cannot walk on NULL node");
     switch (node->kind) {
         case ND_SIZEOF:
-            node->lhs = walk(node->lhs);
+            node->lhs = walk_nodecay(node->lhs);
             return new_node_num(node->lhs->type->type_size);
         case ND_ADDR:
             node->lhs = walk(node->lhs);
@@ -97,6 +108,9 @@ Node* walk(Node* node) {
         case ND_LVAR:
             // fprintf(stderr, "walking ND_LVAR\n");
             node->type = node->lvar->type;
+            if (decay) {
+                node = ary_to_ptr(node);
+            }
             return node;
         case ND_ASSIGN:
             // fprintf(stderr, "walking ND_ASSIGN\n");
@@ -166,6 +180,10 @@ Node* walk(Node* node) {
             error("Unknown node kind: %d", node->kind);
     }
 }
+
+Node* walk(Node* node) { return do_walk(node, true); }
+
+Node* walk_nodecay(Node* node) { return do_walk(node, false); }
 
 void sema() {
     for (int i = 0; i < code->size; i++) {
