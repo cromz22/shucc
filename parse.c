@@ -65,17 +65,13 @@ Type* new_ty(TypeKind kind, int size) {
  * Create a new int type instance
  * @return  created int instance
  */
-Type* new_ty_int() {
-    return new_ty(TY_INT, 8);  // TODO: 4
-}
+Type* new_ty_int() { return new_ty(TY_INT, 4); }
 
 /**
  * Create a new char type instance
  * @return  created char instance
  */
-Type* new_ty_char() {
-    return new_ty(TY_CHAR, 8);  // TODO: 1
-}
+Type* new_ty_char() { return new_ty(TY_CHAR, 1); }
 
 /**
  * Create a new pointer type instance
