@@ -85,6 +85,7 @@ struct Node {
  */
 typedef enum {
     TY_INT,
+    TY_CHAR,
     TY_PTR,
     TY_ARRAY,
 } TypeKind;
@@ -175,6 +176,7 @@ Lvar *find_lvar(Token *tok);
 Type *read_type();
 Type *new_ty(TypeKind kind, int size);
 Type *new_ty_int();
+Type *new_ty_char();
 Type *new_ty_ptr(Type *dest);
 
 Node *declaration();  // declaration = "int" ident ("[" expr "]")?
@@ -203,6 +205,7 @@ void sema();
 
 /* codegen.c */
 void gen_x86_64();
+void gen(Node *node);
 
 /* global variables */
 extern char *user_input;  // input program

@@ -37,6 +37,8 @@ Type* read_type() {
     Type* type;
     if (consume("int")) {
         type = new_ty_int();
+    } else if (consume("char")) {
+        type = new_ty_char();
     } else {
         error("No such type");
     }
@@ -65,6 +67,14 @@ Type* new_ty(TypeKind kind, int size) {
  */
 Type* new_ty_int() {
     return new_ty(TY_INT, 8);  // TODO: 4
+}
+
+/**
+ * Create a new char type instance
+ * @return  created char instance
+ */
+Type* new_ty_char() {
+    return new_ty(TY_CHAR, 8);  // TODO: 1
 }
 
 /**
@@ -191,7 +201,7 @@ void func_or_gvar() {
 Node* stmt() {
     Node* node;
 
-    if (peek("int")) {
+    if (peek("int") || peek("char")) {
         node = declaration();
         expect(";");
     } else if (consume("{")) {

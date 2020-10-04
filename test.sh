@@ -71,5 +71,6 @@ assert 42 "int gvar; int main() { return 42; }"
 assert 42 "int gvar[3]; int main() { return 42; }"
 assert 42 "int gvar; int main() { gvar = 42; return gvar; }"
 assert 3 "int gvar; int increment() { gvar = gvar + 1; return 0; } int main() { gvar = 0; while (gvar < 3) {increment();} return gvar; }"
+assert 1 "int main() { char x; x = 1; return x; }"
 
 echo OK
