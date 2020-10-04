@@ -40,11 +40,12 @@ int main(int argc, char** argv) {
 
         funcs = program();
         fprintf(stderr, "AST OK\n");
-        draw_ast();
-        fprintf(stderr, "draw AST OK\n");
 
         sema();
         fprintf(stderr, "sema OK\n");
+
+        draw_ast();
+        fprintf(stderr, "draw AST OK\n");
 
         gen_x86_64();
     } else {

@@ -67,7 +67,7 @@ Node* do_walk(Node* node, bool decay) {
         case ND_FUNC_CALL:
             for (int i = 0; i < node->args->size; i++) {
                 Node* arg = vec_get(node->args, i);
-                vec_set(node->args, i, arg);
+                vec_set(node->args, i, walk(arg));
             }
             node->type = node->func->return_type;
             return node;
@@ -146,7 +146,7 @@ Node* do_walk(Node* node, bool decay) {
                 node->lhs = node->rhs;
                 node->rhs = tmp;
             }
-            assert(node->rhs->type->kind == TY_INT && "invalid operation TY_PTR + TY_PTR");
+            assert(node->rhs->type->kind != TY_PTR && "invalid operation TY_PTR + TY_PTR");
             if (node->lhs->type->kind == TY_PTR) {  // and rhs->type->kind == TY_INT
                 node->rhs = new_node(ND_MUL, node->rhs, new_node_num(node->rhs->type->type_size));
                 node->rhs->type = new_ty_int();
@@ -166,16 +166,17 @@ Node* do_walk(Node* node, bool decay) {
                     if (!same_type(lty, rty)) {
                         error("Incompatible pointer");
                     }
-                    node = new_node(ND_DIV, node, new_node_num(lty->type_size));
+                    node = new_node(ND_DIV, node, new_node_num(lty->ptr_to->type_size));  // PTR - PTR
                 } else {
-                    node->rhs = new_node(ND_MUL, node->rhs, new_node_num(lty->type_size));
+                    node->rhs =
+                        new_node(ND_MUL, node->rhs, new_node_num(lty->ptr_to->type_size));  // PTR - INT or PTR - CHAR
                 }
                 node->type = lty;
             } else {
-                if (rty->kind == TY_PTR) {
+                if (rty->kind == TY_PTR) {  // INT - PTR or CHAR - PTR
                     error("Invalid operands: %d and %d", lty->kind, rty->kind);
                 }
-                node->type = new_ty_int();
+                node->type = new_ty_int();  // INT - INT
             }
 
             return node;

@@ -1,8 +1,15 @@
 #include "shucc.h"
 
 /* global variables used inside codegen.c */
-int label_counter = 0;                                       // used for if, else, and for statement
-char* argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  // registers for function arguments
+int label_counter = 0;  // used for if, else, and for statement
+
+char* regs64[] = {"r10", "r11", "rbx", "r12", "r13", "r14", "r15"};
+char* regs32[] = {"r10d", "r11d", "ebx", "r12d", "r13d", "r14d", "r15d"};
+char* regs8[] = {"r10b", "r11b", "bl", "r12b", "r13b", "r14b", "r15b"};
+
+char* argregs64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+char* argregs32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+char* argregs8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 
 /**
  * Push the address of the node to stack top.
@@ -37,6 +44,48 @@ void gen_gvar(Gvar* gvar) {
 }
 
 /**
+ * Return proper register name
+ */
+char* reg(int type_size) {
+    char* reg_name = "";
+    switch (type_size) {
+        case 8:
+            reg_name = regs64[0];
+            break;
+        case 4:
+            reg_name = regs32[0];
+            break;
+        case 1:
+            reg_name = regs8[0];
+            break;
+        default:
+            error("invalid type");
+    }
+    return reg_name;
+}
+
+/**
+ * Return proper register name (function arguments)
+ */
+char* argregs(int type_size, int pos) {
+    char* reg_name = "";
+    switch (type_size) {
+        case 8:
+            reg_name = argregs64[pos];
+            break;
+        case 4:
+            reg_name = argregs32[pos];
+            break;
+        case 1:
+            reg_name = argregs8[pos];
+            break;
+        default:
+            error("invalid type");
+    }
+    return reg_name;
+}
+
+/**
  * generate assembly codes from AST
  * @param node  root node of AST
  */
@@ -51,8 +100,11 @@ void gen(Node* node) {
         case ND_GVAR:
             gen_lval(node);
             printf("  pop rax\n");
-            printf("  mov rax, [rax]\n");
-            printf("  push rax\n");
+            printf("  mov %s, [rax]\n", reg(node->type->type_size));
+            if (node->type->type_size == 1) {
+                printf("  movsx %s, %s\n", reg(8), reg(1));
+            }
+            printf("  push %s\n", reg(8));
             return;
         case ND_ASSIGN:
             if (node->lhs->kind == ND_LVAR || node->lhs->kind == ND_GVAR) {
@@ -63,10 +115,10 @@ void gen(Node* node) {
                 error("invalid left value");
             }
             gen(node->rhs);
-            printf("  pop rdi\n");
+            printf("  pop %s\n", reg(8));
             printf("  pop rax\n");
-            printf("  mov [rax], rdi\n");
-            printf("  push rdi\n");
+            printf("  mov [rax], %s\n", reg(node->type->type_size));
+            printf("  push %s\n", reg(8));
             return;
         case ND_RETURN:
             gen(node->lhs);
@@ -127,7 +179,7 @@ void gen(Node* node) {
                 gen(node->args->data[i]);
             }
             for (int i = node->args->size - 1; i >= 0; i--) {
-                printf("  pop %s\n", argregs[i]);
+                printf("  pop %s\n", argregs(8, i));
             }
             printf("  call %s\n", node->func_name);  // rax = result of calling the function
             printf("  push rax\n");                  // push rax to stack top
@@ -135,11 +187,14 @@ void gen(Node* node) {
         case ND_ADDR:             // e.g. &a
             gen_lval(node->lhs);  // push a to stack top
             return;
-        case ND_DEREF:                     // e.g. *a
-            gen(node->lhs);                // push address of a to stack top
-            printf("  pop rax\n");         // rax = address of a
-            printf("  mov rax, [rax]\n");  // rax = valud of a
-            printf("  push rax\n");        // push the value to stack top
+        case ND_DEREF:                                                // e.g. *a
+            gen(node->lhs);                                           // push address of a to stack top
+            printf("  pop rax\n");                                    // rax = address of a
+            printf("  mov %s, [rax]\n", reg(node->type->type_size));  // rax = value of a
+            if (node->type->type_size == 1) {
+                printf("  movsx %s, %s\n", reg(8), reg(1));
+            }
+            printf("  push %s\n", reg(8));  // push the value to stack top
             return;
     }
 
@@ -211,7 +266,7 @@ void gen_func(Func* fn) {
     for (int i = 0; i < fn->args->size; i++) {
         Node* arg = vec_get(fn->args, i);
         printf("  lea rax, [rbp-%d]\n", arg->lvar->offset);
-        printf("  mov [rax], %s\n", argregs[i]);
+        printf("  mov [rax], %s\n", argregs(arg->type->type_size, i));
     }
 
     // body

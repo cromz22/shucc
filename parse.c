@@ -118,6 +118,7 @@ Node* declaration() {
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
     node->lvar = lvar;
+    node->type = type;
 
     if (consume("[")) {
         int num = expect_number();

@@ -53,14 +53,15 @@ assert 3 "int main() { int x; x = 3; int *y; y = &x; return *y; }"
 assert 5 "int main() { int *****x; return 5; }"
 assert 3 "int main() { int x; int *y; y = &x; *y = 3; return x; }"
 assert 1 "int main() { int a; int b; int c; a = 1; b = 2; c = 3; int *p; p = &c; int *q; q = p + 2; return *q; }"
+assert 2 "int main() { int a; int b; a = 1; b = 2; int *p; p = &a; int *q; q = p - 1; return *q; }"
 assert 4 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &c; int *q; q = p - 1; return *q; }"
 assert 2 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &d + 2; return *p; }"
-assert 8 "int main() { int x; return sizeof(x); }" # TODO: 4
+assert 4 "int main() { int x; return sizeof(x); }" # TODO: 4
 assert 8 "int main() { int *y; return sizeof(y); }"
-assert 8 "int main() { return sizeof(1); }" # TODO: 4
-assert 8 "int main() { return sizeof(sizeof(1)); }" # TODO: 4
+assert 4 "int main() { return sizeof(1); }" # TODO: 4
+assert 4 "int main() { return sizeof(sizeof(1)); }" # TODO: 4
 assert 42 "int main() { int a[10]; return 42; }"
-assert 24 "int main() {int a[3]; return sizeof(a);}"  # sizeof(int) = 8, tentatively
+assert 12 "int main() {int a[3]; return sizeof(a);}"  # sizeof(int) = 8, tentatively
 assert 24 "int main() {int *a[3]; return sizeof(a);}"
 assert 3 "int main() {int a[1]; *a = 3; return *a;}"
 assert 3 "int main() { int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1); }"
@@ -72,5 +73,6 @@ assert 42 "int gvar[3]; int main() { return 42; }"
 assert 42 "int gvar; int main() { gvar = 42; return gvar; }"
 assert 3 "int gvar; int increment() { gvar = gvar + 1; return 0; } int main() { gvar = 0; while (gvar < 3) {increment();} return gvar; }"
 assert 1 "int main() { char x; x = 1; return x; }"
+assert 1 "int main() { char x; return sizeof(x); }"
 
 echo OK
