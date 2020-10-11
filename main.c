@@ -3,8 +3,6 @@
 /* global variables */
 char* user_input;  // input program
 Token* token;      // current token
-Map* funcs;        // functions
-Map* gvars;        // global variables
 
 /**
  * Print out each token str
@@ -38,21 +36,21 @@ int main(int argc, char** argv) {
         check_tokenization(argv);
         fprintf(stderr, "tokenize OK\n");
 
-        funcs = program();
+        Program* prog = program();
         fprintf(stderr, "AST OK\n");
 
-        sema();
+        sema(prog);
         fprintf(stderr, "sema OK\n");
 
-        draw_ast();
+        draw_ast(prog);
         fprintf(stderr, "draw AST OK\n");
 
-        gen_x86_64();
+        gen_x86_64(prog);
     } else {
         token = tokenize(argv[1]);  // tokenize the given string and initialize token by the first one
-        funcs = program();          // generate AST from input
-        sema();
-        gen_x86_64();
+        Program* prog = program();  // generate AST from input
+        sema(prog);
+        gen_x86_64(prog);
     }
 
     return 0;

@@ -281,19 +281,19 @@ void gen_func(Func* fn) {
 /**
  * generate x86_64 specific assembly
  */
-void gen_x86_64() {
+void gen_x86_64(Program* prog) {
     printf(".intel_syntax noprefix\n");
 
     printf(".data\n");
-    for (int i = 0; i < gvars->size; i++) {
-        gen_gvar(vec_get(gvars->vals, i));
+    for (int i = 0; i < prog->gvars->size; i++) {
+        gen_gvar(vec_get(prog->gvars->vals, i));
     }
 
     printf("\n");
     printf(".text\n");
     Func* fn;
-    for (int i = 0; i < funcs->size; i++) {
-        fn = vec_get(funcs->vals, i);
+    for (int i = 0; i < prog->funcs->size; i++) {
+        fn = vec_get(prog->funcs->vals, i);
         gen_func(fn);
     }
 }

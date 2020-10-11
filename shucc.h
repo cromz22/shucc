@@ -128,6 +128,11 @@ struct Func {
     Type *return_type;  // type of returned value
 };
 
+typedef struct {
+    Map *funcs;  // function definitions (Map<char *, Func *>)
+    Map *gvars;  // global variable declarations (Map<char *, Var *>)
+} Program;
+
 /**
  * Vector (~ array in Python)
  */
@@ -181,7 +186,7 @@ Type *new_ty_char();
 Type *new_ty_ptr(Type *dest);
 
 Node *declaration();  // declaration = "int" ident ("[" expr "]")?
-Map *program();       // program = func* | gvar*
+Program *program();   // program = func* | gvar*
 void func_or_gvar();  // func = ident "(" expr? ("," expr)* ")" "{" stmt* "}"
 Node *stmt();         // stmt = "return"? expr ";"
                       //      | "if" "(" expr ")" stmt ("else" stmt)?
@@ -211,5 +216,3 @@ void gen(Node *node);
 /* global variables */
 extern char *user_input;  // input program
 extern Token *token;      // current token
-extern Map *funcs;        // functions
-extern Map *gvars;        // global variables

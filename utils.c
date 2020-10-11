@@ -267,9 +267,9 @@ void draw_node_tree(Node *node, int depth, char *role) {
 /**
  * Draws the abstract syntax tree of a program.
  */
-void draw_ast() {
-    for (int i = 0; i < funcs->size; i++) {
-        Func *fn = vec_get(funcs->vals, i);
+void draw_ast(Program *prog) {
+    for (int i = 0; i < prog->funcs->size; i++) {
+        Func *fn = vec_get(prog->funcs->vals, i);
         if (!fn) {
             break;
         }

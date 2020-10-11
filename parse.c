@@ -1,7 +1,9 @@
 #include "shucc.h"
 
 /* global variable used inside parse.c */
-Func* fn;  // function now being parsed
+Map* funcs;  // functions
+Map* gvars;  // global variables
+Func* fn;    // function now being parsed
 
 /*
  * Create a non-leaf node.
@@ -146,14 +148,17 @@ Node* declaration() {
     return node;
 }
 
-Map* program() {
+Program* program() {
     // fprintf(stderr, "hello from program\n");
+    Program* prog = calloc(1, sizeof(Program));
     funcs = map_create();
     gvars = map_create();
     while (token->kind != TK_EOF) {
         func_or_gvar();  // inside func tokens are updated
     }
-    return funcs;
+    prog->funcs = funcs;
+    prog->gvars = gvars;
+    return prog;
 }
 
 void func_or_gvar() {

@@ -195,10 +195,10 @@ Node* walk(Node* node) { return do_walk(node, true); }
 
 Node* walk_nodecay(Node* node) { return do_walk(node, false); }
 
-void sema() {
+void sema(Program* prog) {
     // fprintf(stderr, "hello from sema\n");
-    for (int i = 0; i < funcs->size; i++) {
-        Func* fn = vec_get(funcs->vals, i);
+    for (int i = 0; i < prog->funcs->size; i++) {
+        Func* fn = vec_get(prog->funcs->vals, i);
         fn->body = walk(fn->body);
     }
 }
