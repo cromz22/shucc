@@ -3,9 +3,11 @@ assert() {
 	expected="$1"
 	input="$2"
 
-	./shucc "$input" > tmp.s
-	cc -static -o tmp tmp.s
-	./tmp
+	tmp_dir=$(mktemp -d)
+	echo "$input" > "$tmp_dir/tmp.c"
+	./shucc "$tmp_dir/tmp.c" > "$tmp_dir/tmp.s"
+	cc -static -o "$tmp_dir/tmp" "$tmp_dir/tmp.s"
+	$tmp_dir/tmp
 	actual="$?"
 
 	if [ "$actual" = "$expected" ]; then
@@ -56,12 +58,12 @@ assert 1 "int main() { int a; int b; int c; a = 1; b = 2; c = 3; int *p; p = &c;
 assert 2 "int main() { int a; int b; a = 1; b = 2; int *p; p = &a; int *q; q = p - 1; return *q; }"
 assert 4 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &c; int *q; q = p - 1; return *q; }"
 assert 2 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &d + 2; return *p; }"
-assert 4 "int main() { int x; return sizeof(x); }" # TODO: 4
+assert 4 "int main() { int x; return sizeof(x); }"
 assert 8 "int main() { int *y; return sizeof(y); }"
-assert 4 "int main() { return sizeof(1); }" # TODO: 4
-assert 4 "int main() { return sizeof(sizeof(1)); }" # TODO: 4
+assert 4 "int main() { return sizeof(1); }"
+assert 4 "int main() { return sizeof(sizeof(1)); }"
 assert 42 "int main() { int a[10]; return 42; }"
-assert 12 "int main() {int a[3]; return sizeof(a);}"  # sizeof(int) = 8, tentatively
+assert 12 "int main() {int a[3]; return sizeof(a);}"
 assert 24 "int main() {int *a[3]; return sizeof(a);}"
 assert 3 "int main() {int a[1]; *a = 3; return *a;}"
 assert 3 "int main() { int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1); }"
