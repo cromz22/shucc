@@ -63,6 +63,9 @@ Node* do_walk(Node* node, bool decay) {
             node->lhs = walk(node->lhs);
             assert(node->lhs->type->kind == TY_PTR && "expected TY_PTR");
             node->type = node->lhs->type->ptr_to;
+            if (decay) {
+                node = ary_to_ptr(node);
+            }
             return node;
         case ND_FUNC_CALL:
             for (int i = 0; i < node->args->size; i++) {

@@ -74,5 +74,13 @@ assert 42 "int gvar; int main() { gvar = 42; return gvar; }"
 assert 3 "int gvar; int increment() { gvar = gvar + 1; return 0; } int main() { gvar = 0; while (gvar < 3) {increment();} return gvar; }"
 assert 1 "int main() { char x; x = 1; return x; }"
 assert 1 "int main() { char x; return sizeof(x); }"
+assert 0 "int main() { int x[2][2]; return 0; }"
+assert 0 'int main() { int x[2][3]; int *y; y=x[0]; y[0]=0; return x[0][0]; }'
+assert 1 'int main() { int x[2][3]; int *y; y=x[0]; y[1]=1; return x[0][1]; }'
+assert 2 'int main() { int x[2][3]; int *y; y=x[0]; y[2]=2; return x[0][2]; }'
+assert 3 'int main() { int x[2][3]; int *y; y=x[1]; y[0]=3; return x[1][0]; }'
+assert 4 'int main() { int x[2][3]; int *y; y=x[1]; y[1]=4; return x[1][1]; }'
+assert 5 'int main() { int x[2][3]; int *y; y=x[1]; y[2]=5; return x[1][2]; }'
+assert 12 'int main() { int a[2][3]; return sizeof(*a); }'
 
 echo OK

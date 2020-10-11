@@ -104,6 +104,25 @@ Node* new_node_gvar(char* name, Type* type) {
     node->type = type;
 }
 
+Type* read_array(Type* type) {
+    Vector* nums = vec_create();
+    while (1) {
+        if (consume("[")) {
+            // type = new_ty_array(type, expect_number()); // type を作らずに vector に push
+            vec_push(nums, (void*)(intptr_t)expect_number());
+            expect("]");
+        } else {
+            break;
+        }
+    }
+
+    // このへんで vector を後ろから見て type を作る
+    for (int i = nums->size - 1; i >= 0; i--) {
+        type = new_ty_array(type, (int)(intptr_t)vec_get(nums, i));
+    }
+    return type;
+}
+
 /* grammatical functions */
 
 Node* declaration() {
@@ -120,11 +139,7 @@ Node* declaration() {
     node->lvar = lvar;
     node->type = type;
 
-    if (consume("[")) {
-        int num = expect_number();
-        lvar->type = new_ty_array(type, num);
-        expect("]");
-    }
+    lvar->type = read_array(lvar->type);
 
     map_insert(fn->lvars, tok->str, lvar);
 
@@ -178,10 +193,9 @@ void func_or_gvar() {
         if (map_at(gvars, tok->str)) {
             error("global variable '%s' is already defined", tok->str);
         }
-        if (consume("[")) {
-            type = new_ty_array(type, expect_number());
-            expect("]");
-        }
+
+        type = read_array(type);
+
         Gvar* gv = calloc(1, sizeof(Gvar));
         gv->name = tok->str;
         gv->len = tok->len;
