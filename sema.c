@@ -200,6 +200,8 @@ void sema(Program* prog) {
     // fprintf(stderr, "hello from sema\n");
     for (int i = 0; i < prog->funcs->size; i++) {
         Func* fn = vec_get(prog->funcs->vals, i);
-        fn->body = walk(fn->body);
+        if (fn->body) {
+            fn->body = walk(fn->body);
+        }
     }
 }

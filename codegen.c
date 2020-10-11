@@ -307,6 +307,8 @@ void gen_x86_64(Program* prog) {
     Func* fn;
     for (int i = 0; i < prog->funcs->size; i++) {
         fn = vec_get(prog->funcs->vals, i);
-        gen_func(fn);
+        if (fn->body) {
+            gen_func(fn);
+        }
     }
 }

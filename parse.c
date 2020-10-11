@@ -187,6 +187,12 @@ void func_or_gvar() {
 
         map_insert(funcs, fn->name, fn);
 
+        if (consume(";")) {
+            // prototype declaration
+            fn->body = NULL;
+            return;
+        }
+
         expect("{");
         // read body
         Node* node = calloc(1, sizeof(Node));
