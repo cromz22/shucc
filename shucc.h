@@ -24,6 +24,7 @@ typedef enum {
     TK_IDENT,     // identifier
     TK_RESERVED,  // symbol
     TK_NUM,       // number
+    TK_STRING,    // string literal
     TK_EOF,       // end
 } TokenKind;
 
@@ -39,6 +40,7 @@ struct Token {
  * NodeKind and Node
  */
 typedef enum {
+    ND_STRL,       // string literal
     ND_GVAR,       // global variable
     ND_SIZEOF,     // sizeof
     ND_ADDR,       // &
@@ -78,7 +80,8 @@ struct Node {
     Type *type;       // e.g. int x; x + 3; => type of x + 3 aka type of this ND_ADD is int
     Lvar *lvar;       // to decide which lvar current node is
     Func *func;       // to access return type
-    Gvar *gvar;
+    Gvar *gvar;       //
+    int strl_id;      // id of string literals
 };
 
 /**
@@ -129,8 +132,9 @@ struct Func {
 };
 
 typedef struct {
-    Map *funcs;  // function definitions (Map<char *, Func *>)
-    Map *gvars;  // global variable declarations (Map<char *, Var *>)
+    Map *funcs;     // function definitions (Map<char *, Func *>)
+    Map *gvars;     // global variable declarations (Map<char *, Var *>)
+    Vector *strls;  // string literals (Vector<char *>)
 } Program;
 
 /**
@@ -167,6 +171,7 @@ void draw_ast();
 /* tokenize.c */
 bool consume(char *op);
 Token *consume_ident();
+Token *consume_string();
 void expect(char *op);
 int expect_number();
 bool peek(char *op);

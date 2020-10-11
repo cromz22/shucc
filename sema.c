@@ -184,6 +184,7 @@ Node* do_walk(Node* node, bool decay) {
 
             return node;
         case ND_NUM:
+        case ND_STRL:
             // fprintf(stderr, "walking ND_NUM\n");
             return node;
         default:

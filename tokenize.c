@@ -27,6 +27,19 @@ Token *consume_ident() {
 }
 
 /**
+ * Skip string literal.
+ * @return string literal
+ */
+Token *consume_string() {
+    if (token->kind != TK_STRING) {
+        return false;
+    }
+    Token *strl = token;
+    token = token->next;
+    return strl;
+}
+
+/**
  * Expect the next token to be the symbol op (i.e. skip op) and raise error if not skipped
  * @param op  symbol to be expected
  */
@@ -75,7 +88,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
 
     // map_insert (used inside primary@parse.c) uses strcmp, so str has to end with \0
     char *str_sliced = calloc(len + 1, sizeof(char));
-    strncpy(str_sliced, str, len);
+    strncpy(str_sliced, str, len);  // not copied if len == 0
     str_sliced[len] = '\0';
 
     tok->kind = kind;
@@ -159,6 +172,28 @@ Token *tokenize(char *p) {
             p += 2;
             continue;
         }
+
+        // tokenize string literal
+        if (*p == '"') {
+            cur = new_token(TK_RESERVED, cur, p, 1);
+            // *p = "
+            // "abc": len = 3, tokens = [", abc, "]
+            // "": len = 0, tokens = [", 空文字列, "]
+            int len = 0;
+            while (p[len + 1] && p[len + 1] != '"') {
+                // p++;
+                // fprintf(stderr, "%c", *p);
+                len++;
+            }
+            cur = new_token(TK_STRING, cur, p + 1, len);
+            // p = ", len=3
+            // "abc"
+            p += len + 1;
+            cur = new_token(TK_RESERVED, cur, p, 1);
+            p++;
+            continue;
+        }
+
         // single-letter reserved token
         if (ispunct(*p)) {  // !"#$%&'()*+,-./:;<=>?@[\]^_`{|}
             cur = new_token(TK_RESERVED, cur, p, 1);

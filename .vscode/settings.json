@@ -4,4 +4,5 @@
     "editor.formatOnType": false,
     "editor.fontFamily": "'Cascadia Code'",
     "editor.fontLigatures": true,
+    "files.autoSave": "onFocusChange",
 }

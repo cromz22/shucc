@@ -43,6 +43,11 @@ void gen_gvar(Gvar* gvar) {
     printf("  .zero %d\n", gvar->type->type_size);
 }
 
+void gen_strl(int id, char* str) {
+    printf(".LC%d:\n", id);
+    printf("  .string \"%s\"\n", str);
+}
+
 /**
  * Return proper register name
  */
@@ -95,6 +100,10 @@ void gen(Node* node) {
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
+            return;
+        case ND_STRL:
+            printf("  lea rax, .LC%d\n", node->strl_id);  // アドレス自身をraxに入れる
+            printf("  push rax\n");
             return;
         case ND_LVAR:
         case ND_GVAR:
@@ -287,6 +296,10 @@ void gen_x86_64(Program* prog) {
     printf(".data\n");
     for (int i = 0; i < prog->gvars->size; i++) {
         gen_gvar(vec_get(prog->gvars->vals, i));
+    }
+
+    for (int i = 0; i < prog->strls->size; i++) {
+        gen_strl(i, vec_get(prog->strls, i));
     }
 
     printf("\n");

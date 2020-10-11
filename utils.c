@@ -246,6 +246,9 @@ void draw_node_tree(Node *node, int depth, char *role) {
             case ND_NUM:
                 fprintf(stderr, "NUM(%d)\n", node->val);
                 break;
+            case ND_STRL:
+                fprintf(stderr, "STRL(id: %d)\n", node->strl_id);
+                break;
             case ND_ADDR:
                 fprintf(stderr, "ADDR\n");
                 draw_node_tree(node->lhs, depth + 1, "");

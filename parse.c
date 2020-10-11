@@ -1,9 +1,10 @@
 #include "shucc.h"
 
 /* global variable used inside parse.c */
-Map* funcs;  // functions
-Map* gvars;  // global variables
-Func* fn;    // function now being parsed
+Map* funcs;     // functions
+Map* gvars;     // global variables
+Vector* strls;  // string literals
+Func* fn;       // function now being parsed
 
 /*
  * Create a non-leaf node.
@@ -126,7 +127,6 @@ Type* read_array(Type* type) {
 }
 
 /* grammatical functions */
-
 Node* declaration() {
     Type* type = read_type();
 
@@ -153,11 +153,13 @@ Program* program() {
     Program* prog = calloc(1, sizeof(Program));
     funcs = map_create();
     gvars = map_create();
+    strls = vec_create();
     while (token->kind != TK_EOF) {
         func_or_gvar();  // inside func tokens are updated
     }
     prog->funcs = funcs;
     prog->gvars = gvars;
+    prog->strls = strls;
     return prog;
 }
 
@@ -422,6 +424,18 @@ Node* primary() {
                 node->gvar = gvar;
             }
         }
+        return node;
+    }
+
+    // case primary = string literal
+    if (consume("\"")) {
+        Token* tok = consume_string();
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_STRL;
+        node->type = new_ty_ptr(new_ty_char());  // literal の type は parse で決める
+        node->strl_id = strls->size;
+        vec_push(strls, tok->str);
+        expect("\"");
         return node;
     }
 
