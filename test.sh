@@ -55,5 +55,9 @@ assert 3 "int main() { int x; int *y; y = &x; *y = 3; return x; }"
 assert 1 "int main() { int a; int b; int c; a = 1; b = 2; c = 3; int *p; p = &c; int *q; q = p + 2; return *q; }"
 assert 4 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &c; int *q; q = p - 1; return *q; }"
 assert 2 "int main() { int a; int b; int c; int d; a = 1; b = 2; c = 3; d = 4; int *p; p = &d + 2; return *p; }"
+assert 8 "int main() { int x; return sizeof(x); }" # TODO: 4
+assert 8 "int main() { int *y; return sizeof(y); }"
+assert 8 "int main() { return sizeof(1); }" # TODO: 4
+assert 8 "int main() { return sizeof(sizeof(1)); }" # TODO: 4
 
 echo OK

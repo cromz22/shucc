@@ -37,6 +37,7 @@ struct Token {
  * NodeKind and Node
  */
 typedef enum {
+    ND_SIZEOF,     // sizeof
     ND_ADDR,       // &
     ND_DEREF,      // *
     ND_FUNC_CALL,  // function call
@@ -177,7 +178,7 @@ Node *equality();     // equality = relational ("==" relational | "!=" relationa
 Node *relational();   // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node *add();          // add = mul ("+" mul | "-" mul)*
 Node *mul();          // mul = unary ("*" unary | "/" unary)*
-Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary
+Node *unary();        // unary = ("+" | "-")? primary | "*" unary | "&" unary | "sizeof" unary
 Node *primary();      // primary = "(" expr ")" | num | ident ( "(" expr? ("," expr)* ")" )?
 
 /* sema.c */
