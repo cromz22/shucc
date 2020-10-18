@@ -71,6 +71,9 @@ int test59() { int x[2][3]; int *y; y=x[1]; y[0]=3; return x[1][0]; }
 int test60() { int x[2][3]; int *y; y=x[1]; y[1]=4; return x[1][1]; }
 int test61() { int x[2][3]; int *y; y=x[1]; y[2]=5; return x[1][2]; }
 int test62() { int a[2][3]; return sizeof(*a); }
+int test63() { int x = 3; return x; }
+int test64() { int x = foo(); return x; }
+int test65() { char x = 3; return x; }
 
 int main() {
     assert(0, test0(), "return 0;");
@@ -136,5 +139,8 @@ int main() {
     assert(4, test60(), "int x[2][3]; int *y; y=x[1]; y[1]=4; return x[1][1];");
     assert(5, test61(), "int x[2][3]; int *y; y=x[1]; y[2]=5; return x[1][2];");
     assert(12, test62(), "int a[2][3]; return sizeof(*a);");
+    assert(3, test63(), "int x = 3; return x;");
+    assert(3, test64(), "int x = foo(); return x;");
+    assert(3, test65(), "char x = 3; return x;");
     return 0;
 }

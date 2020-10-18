@@ -146,6 +146,12 @@ Node* declaration() {
 
     map_insert(fn->lvars, tok->str, lvar);
 
+    // ND_ASSIGN
+    //
+    if (consume("=")) {
+        node = new_node(ND_ASSIGN, node, assign());
+    }
+
     return node;
 }
 
