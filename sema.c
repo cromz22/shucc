@@ -185,7 +185,9 @@ Node* do_walk(Node* node, bool decay) {
             return node;
         case ND_NUM:
         case ND_STRL:
-            // fprintf(stderr, "walking ND_NUM\n");
+            if (decay) {
+                node = ary_to_ptr(node);
+            }
             return node;
         default:
             error("Unknown node kind: %d", node->kind);

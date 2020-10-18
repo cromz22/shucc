@@ -90,6 +90,7 @@ Type* new_ty_ptr(Type* dest) {
 /**
  * Create a new array type instance
  * @param dest  destination of the pointer (e.g. int if int*)
+ * @param num   array size
  * @return      created pointer instance
  */
 Type* new_ty_array(Type* dest, int num) {
@@ -438,7 +439,7 @@ Node* primary() {
         Token* tok = consume_string();
         node = calloc(1, sizeof(Node));
         node->kind = ND_STRL;
-        node->type = new_ty_ptr(new_ty_char());  // literal の type は parse で決める
+        node->type = new_ty_array(new_ty_char(), tok->len);  // literal の type は parse で決める
         node->strl_id = strls->size;
         vec_push(strls, tok->str);
         expect("\"");

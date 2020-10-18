@@ -33,6 +33,10 @@ void gen_lval(Node* node) {
         case ND_DEREF:
             gen(node->lhs);
             break;
+        case ND_STRL:                                     // 必ずND_ADDRになるのでgen_lvalが呼ばれる
+            printf("  lea rax, .LC%d\n", node->strl_id);  // アドレス自身をraxに入れる
+            printf("  push rax\n");
+            return;
         default:
             error("unexpected node kind '%s'", node->kind);
     }
@@ -100,10 +104,6 @@ void gen(Node* node) {
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
-            return;
-        case ND_STRL:
-            printf("  lea rax, .LC%d\n", node->strl_id);  // アドレス自身をraxに入れる
-            printf("  push rax\n");
             return;
         case ND_LVAR:
         case ND_GVAR:
