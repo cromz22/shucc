@@ -112,7 +112,6 @@ Type* read_array(Type* type) {
     Vector* nums = vec_create();
     while (1) {
         if (consume("[")) {
-            // type = new_ty_array(type, expect_number()); // type を作らずに vector に push
             vec_push(nums, (void*)(intptr_t)expect_number());
             expect("]");
         } else {
@@ -149,9 +148,25 @@ Node* declaration() {
     // ND_ASSIGN
     //
     if (consume("=")) {
-        node = new_node(ND_ASSIGN, node, assign());
+        if (lvar->type->kind == TY_ARRAY) {
+            expect("{");
+            Node* init = new_node(ND_BLOCK, NULL, NULL);
+            init->stmts = vec_create();
+            for (int i = 0; i < lvar->type->array_size + 1; i++) {
+                if (consume("}")) {
+                    break;
+                }
+                if (init->stmts->size > 0) {
+                    expect(",");
+                }
+                Node* add = new_node(ND_ADD, node, new_node_num(i));
+                vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), expr()));
+            }
+            return init;
+        } else {
+            node = new_node(ND_ASSIGN, node, assign());
+        }
     }
-
     return node;
 }
 

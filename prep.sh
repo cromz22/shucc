@@ -74,7 +74,7 @@ append "int a[2][3]; return sizeof(*a);" "12"
 append "int x = 3; return x;" "3"
 append "int x = foo(); return x;" "3"
 append "char x = 3; return x;" "3"
-# append "int a[3] = {0, 1, 2}; return a[1];" "1"
+append "int a[3] = {0, 1, 2}; return a[1];" "1"
 # append "int a[] = {0, 1, 2}; return a[1];" "1"
 # append "int a[3] = {2}; return a[2];" "0"
 
