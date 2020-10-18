@@ -77,28 +77,21 @@ append "char x = 3; return x;" "3"
 append "int a[3] = {0, 1, 2}; return a[1];" "1"
 append "int a[3] = {2}; return a[2];" "0"
 append "int a[] = {0, 1, 2}; return a[1];" "1"
+append "char* foo; foo = \"bar\"; return 0;" "0"
 
 
-helper=$(cat <<<"
+cat <<EOF
+int assert(int expected, int actual, char *code);
+
 int gvar;
 int garr[3];
 int increment() { gvar = gvar + 1; return 0; }
 int foo() { return 3; }
-int add(int a, int b) {return a + b;}
+int add(int a, int b) { return a + b; }
 int fibo(int n) { if (n == 1) return 1; else if (n == 0) return 1; else return fibo(n-1) + fibo(n-2); }
 char first(char *str) { return str[0]; }
-")
-echo "${helper}"
 
-# i=0
-# for prog in "${!tests[@]}"
-# do
-#   echo "int test${i}() { ${prog} }"
-#   let i++
-# done
-echo "int assert(int expected, int actual, char *code);"
-
-echo ""
+EOF
 
 for i in "${!inputs[@]}"
 do
@@ -110,7 +103,7 @@ echo ""
 echo "int main() {"
 for i in "${!inputs[@]}"
 do
-  echo "    assert(${outputs[i]}, test${i}(), \"${inputs[i]}\");"
+  echo "    assert(${outputs[i]}, test${i}(), \"$(echo ${inputs[i]} | sed -e 's/"/\\"/g')\");"
 done
 echo "    return 0;"
 echo "}"

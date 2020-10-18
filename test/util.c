@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 
 int assert(int expected, int actual, char *code) {
     if (expected == actual) {

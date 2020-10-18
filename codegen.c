@@ -190,6 +190,7 @@ void gen(Node* node) {
             for (int i = node->args->size - 1; i >= 0; i--) {
                 printf("  pop %s\n", argregs(8, i));
             }
+            printf("  mov al, 0\n");
             printf("  call %s\n", node->func_name);  // rax = result of calling the function
             printf("  push rax\n");                  // push rax to stack top
             return;

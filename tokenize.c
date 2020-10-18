@@ -189,19 +189,21 @@ Token *tokenize(char *p) {
         // tokenize string literal
         if (*p == '"') {
             cur = new_token(TK_RESERVED, cur, p, 1);
+            p++;
             // *p = "
             // "abc": len = 3, tokens = [", abc, "]
             // "": len = 0, tokens = [", 空文字列, "]
             int len = 0;
-            while (p[len + 1] && p[len + 1] != '"') {
-                // p++;
-                // fprintf(stderr, "%c", *p);
+            while (p[len] && p[len] != '"') {
+                if (p[len] == '\\') {
+                    len++;
+                }
                 len++;
             }
-            cur = new_token(TK_STRING, cur, p + 1, len);
+            cur = new_token(TK_STRING, cur, p, len);
             // p = ", len=3
             // "abc"
-            p += len + 1;
+            p += len;
             cur = new_token(TK_RESERVED, cur, p, 1);
             p++;
             continue;

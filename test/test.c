@@ -1,12 +1,12 @@
+int assert(int expected, int actual, char *code);
 
 int gvar;
 int garr[3];
 int increment() { gvar = gvar + 1; return 0; }
 int foo() { return 3; }
-int add(int a, int b) {return a + b;}
+int add(int a, int b) { return a + b; }
 int fibo(int n) { if (n == 1) return 1; else if (n == 0) return 1; else return fibo(n-1) + fibo(n-2); }
 char first(char *str) { return str[0]; }
-int assert(int expected, int actual, char *code);
 
 int test0() { return 0; }
 int test1() { return 42; }
@@ -77,14 +77,15 @@ int test65() { char x = 3; return x; }
 int test66() { int a[3] = {0, 1, 2}; return a[1]; }
 int test67() { int a[3] = {2}; return a[2]; }
 int test68() { int a[] = {0, 1, 2}; return a[1]; }
+int test69() { char* foo; foo = "bar"; return 0; }
 
 int main() {
     assert(0, test0(), "return 0;");
     assert(42, test1(), "return 42;");
     assert(21, test2(), "return 5+20-4;");
     assert(42, test3(), "return 10 + 40 - 8;");
-    assert(47, test4(), "return 5 + 6 * 7;");
-    assert(15, test5(), "return 5 * (9 - 6);");
+    assert(47, test4(), "return 5 + 6 Makefile codegen.c codegen.o foo.txt main.c main.o parse.c parse.o prep.sh sema.c sema.o shucc shucc.h test test.sh tokenize.c tokenize.o utils.c utils.o 7;");
+    assert(15, test5(), "return 5 Makefile codegen.c codegen.o foo.txt main.c main.o parse.c parse.o prep.sh sema.c sema.o shucc shucc.h test test.sh tokenize.c tokenize.o utils.c utils.o (9 - 6);");
     assert(4, test6(), "return (3 + 5) / 2;");
     assert(10, test7(), "return -10 + 20;");
     assert(0, test8(), "return 42 < 42;");
@@ -95,7 +96,7 @@ int main() {
     assert(0, test13(), "return 42 != 42;");
     assert(14, test14(), "int a; return 14;");
     assert(42, test15(), "int a; a = 3; return 42;");
-    assert(14, test16(), "int a; a = 3; int b; b = 5 * 6 - 8; return a + b / 2;");
+    assert(14, test16(), "int a; a = 3; int b; b = 5 Makefile codegen.c codegen.o foo.txt main.c main.o parse.c parse.o prep.sh sema.c sema.o shucc shucc.h test test.sh tokenize.c tokenize.o utils.c utils.o 6 - 8; return a + b / 2;");
     assert(8, test17(), "int foo; int bar; foo = 3; bar = 5; return foo + bar;");
     assert(8, test18(), "int foo; int bar; foo = 3; bar = 5; return foo + bar;");
     assert(42, test19(), "if (1) return 42;");
@@ -148,5 +149,6 @@ int main() {
     assert(1, test66(), "int a[3] = {0, 1, 2}; return a[1];");
     assert(0, test67(), "int a[3] = {2}; return a[2];");
     assert(1, test68(), "int a[] = {0, 1, 2}; return a[1];");
+    assert(0, test69(), "char* foo; foo = \"bar\"; return 0;");
     return 0;
 }
