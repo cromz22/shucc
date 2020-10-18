@@ -76,6 +76,7 @@ int test64() { int x = foo(); return x; }
 int test65() { char x = 3; return x; }
 int test66() { int a[3] = {0, 1, 2}; return a[1]; }
 int test67() { int a[3] = {2}; return a[2]; }
+int test68() { int a[] = {0, 1, 2}; return a[1]; }
 
 int main() {
     assert(0, test0(), "return 0;");
@@ -146,5 +147,6 @@ int main() {
     assert(3, test65(), "char x = 3; return x;");
     assert(1, test66(), "int a[3] = {0, 1, 2}; return a[1];");
     assert(0, test67(), "int a[3] = {2}; return a[2];");
+    assert(1, test68(), "int a[] = {0, 1, 2}; return a[1];");
     return 0;
 }

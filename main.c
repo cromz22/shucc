@@ -71,11 +71,14 @@ int main(int argc, char** argv) {
         Program* prog = program();
         fprintf(stderr, "AST OK\n");
 
+        draw_ast(prog);
+        fprintf(stderr, "drawAST-1 OK\n");
+
         sema(prog);
         fprintf(stderr, "sema OK\n");
 
         draw_ast(prog);
-        fprintf(stderr, "draw AST OK\n");
+        fprintf(stderr, "drawAST-2 OK\n");
 
         gen_x86_64(prog);
     } else {

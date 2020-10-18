@@ -19,7 +19,7 @@ bool consume(char *op) {
  */
 Token *consume_ident() {
     if (token->kind != TK_IDENT) {
-        return false;
+        return NULL;
     }
     Token *ident = token;
     token = token->next;
@@ -32,11 +32,24 @@ Token *consume_ident() {
  */
 Token *consume_string() {
     if (token->kind != TK_STRING) {
-        return false;
+        return NULL;
     }
     Token *strl = token;
     token = token->next;
     return strl;
+}
+
+/**
+ * Skip number literal.
+ * @return number literal
+ */
+Token *consume_number() {
+    if (token->kind != TK_NUM) {
+        return NULL;
+    }
+    Token *num = token;
+    token = token->next;
+    return num;
 }
 
 /**

@@ -112,7 +112,9 @@ Type* read_array(Type* type) {
     Vector* nums = vec_create();
     while (1) {
         if (consume("[")) {
-            vec_push(nums, (void*)(intptr_t)expect_number());
+            Token* tok = consume_number();
+            // fprintf(stderr, "%s\n", tok->str);
+            vec_push(nums, (void*)(intptr_t)(tok ? tok->val : -1));  // 本当は0
             expect("]");
         } else {
             break;
@@ -134,6 +136,9 @@ Node* declaration() {
     Token* tok = consume_ident();
     lvar->name = tok->str;
     lvar->len = tok->len;
+
+    type = read_array(type);
+
     lvar->type = type;
 
     Node* node = calloc(1, sizeof(Node));
@@ -141,27 +146,26 @@ Node* declaration() {
     node->lvar = lvar;
     node->type = type;
 
-    lvar->type = read_array(lvar->type);
-
     map_insert(fn->lvars, tok->str, lvar);
 
     // ND_ASSIGN
-    //
     if (consume("=")) {
-        if (lvar->type->kind == TY_ARRAY) {
+        if (type->kind == TY_ARRAY) {
             expect("{");
             Node* init = new_node(ND_BLOCK, NULL, NULL);
             init->stmts = vec_create();
             for (int i = 0;; i++) {
                 if (consume("}")) {
                     // stmts に0を追加
-                    for (int j = i; j < lvar->type->array_size; j++) {
-                        Node* add = new_node(ND_ADD, node, new_node_num(i));
-                        vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), new_node_num(0)));
+                    if (type->array_size != -1) {
+                        for (int j = i; j < type->array_size; j++) {
+                            Node* add = new_node(ND_ADD, node, new_node_num(j));
+                            vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), new_node_num(0)));
+                        }
                     }
                     break;
                 }
-                if (i >= lvar->type->array_size) {
+                if (type->array_size != -1 && i >= type->array_size) {
                     error("excess elements in array inititalizer");
                 }
                 if (init->stmts->size > 0) {
@@ -169,6 +173,10 @@ Node* declaration() {
                 }
                 Node* add = new_node(ND_ADD, node, new_node_num(i));                                // *p = ary + 1
                 vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), expr()));  // *p = 1
+            }
+            if (type->array_size == -1) {
+                type->array_size = init->stmts->size;
+                type->type_size = type->ptr_to->type_size * type->array_size;
             }
             return init;
         } else {

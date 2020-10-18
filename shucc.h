@@ -173,6 +173,7 @@ void draw_ast();
 bool consume(char *op);
 Token *consume_ident();
 Token *consume_string();
+Token *consume_number();
 void expect(char *op);
 int expect_number();
 bool peek(char *op);
