@@ -152,15 +152,23 @@ Node* declaration() {
             expect("{");
             Node* init = new_node(ND_BLOCK, NULL, NULL);
             init->stmts = vec_create();
-            for (int i = 0; i < lvar->type->array_size + 1; i++) {
+            for (int i = 0;; i++) {
                 if (consume("}")) {
+                    // stmts に0を追加
+                    for (int j = i; j < lvar->type->array_size; j++) {
+                        Node* add = new_node(ND_ADD, node, new_node_num(i));
+                        vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), new_node_num(0)));
+                    }
                     break;
+                }
+                if (i >= lvar->type->array_size) {
+                    error("excess elements in array inititalizer");
                 }
                 if (init->stmts->size > 0) {
                     expect(",");
                 }
-                Node* add = new_node(ND_ADD, node, new_node_num(i));
-                vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), expr()));
+                Node* add = new_node(ND_ADD, node, new_node_num(i));                                // *p = ary + 1
+                vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), expr()));  // *p = 1
             }
             return init;
         } else {
