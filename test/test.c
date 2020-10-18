@@ -78,6 +78,10 @@ int test66() { int a[3] = {0, 1, 2}; return a[1]; }
 int test67() { int a[3] = {2}; return a[2]; }
 int test68() { int a[] = {0, 1, 2}; return a[1]; }
 int test69() { char* foo; foo = "bar"; return 0; }
+int test70() { char *str = "hello"; return sizeof(str); }
+int test71() { char *str = "hello"; return str[0]; }
+int test72() { char *str = "hello"; return str[1]; }
+int test73() { char *str = "hello"; return str[2]; }
 
 int main() {
     assert(0, test0(), "return 0;");
@@ -150,5 +154,9 @@ int main() {
     assert(0, test67(), "int a[3] = {2}; return a[2];");
     assert(1, test68(), "int a[] = {0, 1, 2}; return a[1];");
     assert(0, test69(), "char* foo; foo = \"bar\"; return 0;");
+    assert(8, test70(), "char *str = \"hello\"; return sizeof(str);");
+    assert(104, test71(), "char *str = \"hello\"; return str[0];");
+    assert(101, test72(), "char *str = \"hello\"; return str[1];");
+    assert(108, test73(), "char *str = \"hello\"; return str[2];");
     return 0;
 }

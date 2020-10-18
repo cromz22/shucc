@@ -151,7 +151,7 @@ Node* do_walk(Node* node, bool decay) {
             }
             assert(node->rhs->type->kind != TY_PTR && "invalid operation TY_PTR + TY_PTR");
             if (node->lhs->type->kind == TY_PTR) {  // and rhs->type->kind == TY_INT
-                node->rhs = new_node(ND_MUL, node->rhs, new_node_num(node->rhs->type->type_size));
+                node->rhs = new_node(ND_MUL, node->rhs, new_node_num(node->lhs->type->ptr_to->type_size));
                 node->rhs->type = new_ty_int();
                 node->type = node->lhs->type;
             } else {
