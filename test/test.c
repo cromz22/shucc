@@ -7,6 +7,10 @@ int foo() { return 3; }
 int add(int a, int b) { return a + b; }
 int fibo(int n) { if (n == 1) return 1; else if (n == 0) return 1; else return fibo(n-1) + fibo(n-2); }
 char first(char *str) { return str[0]; }
+int ginit = 3;
+int giarr[3] = {1, 2, 3};
+char str[4] = "ABC";
+char *strarr[3] = {"str0", "str1", "str2"};
 
 int test0() { return 0; }
 int test1() { return 42; }
@@ -77,6 +81,16 @@ int test65() { char x = 3; return x; }
 int test66() { int a[3] = {0, 1, 2}; return a[1]; }
 int test67() { int a[3] = {2}; return a[2]; }
 int test68() { int a[] = {0, 1, 2}; return a[1]; }
+int test69() { char* foo; foo = "bar"; return 0; }
+int test70() { return ginit; }
+int test71() { return giarr[0]; }
+int test72() { return giarr[1]; }
+int test73() { return giarr[2]; }
+int test74() { return str[0]; }
+int test75() { return str[1]; }
+int test76() { return str[2]; }
+int test77() { return str[3]; }
+int test78() { return strarr[0][0]; }
 
 int main() {
     assert(0, test0(), "return 0;");
@@ -148,5 +162,15 @@ int main() {
     assert(1, test66(), "int a[3] = {0, 1, 2}; return a[1];");
     assert(0, test67(), "int a[3] = {2}; return a[2];");
     assert(1, test68(), "int a[] = {0, 1, 2}; return a[1];");
+    assert(0, test69(), "char* foo; foo = \"bar\"; return 0;");
+    assert(3, test70(), "return ginit;");
+    assert(1, test71(), "return giarr[0];");
+    assert(2, test72(), "return giarr[1];");
+    assert(3, test73(), "return giarr[2];");
+    assert(65, test74(), "return str[0];");
+    assert(66, test75(), "return str[1];");
+    assert(67, test76(), "return str[2];");
+    assert(0, test77(), "return str[3];");
+    assert(115, test78(), "return strarr[0][0];");
     return 0;
 }

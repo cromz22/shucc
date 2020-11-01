@@ -42,9 +42,48 @@ void gen_lval(Node* node) {
     }
 }
 
-void gen_gvar(Gvar* gvar) {
+void gen_gvar_init(Type* type, int val) {
+    switch (type->type_size) {
+        case 1:
+            printf("  .byte 0x%x\n", val);
+            break;
+        case 2:
+        case 4:
+            printf("  .long %d\n", val);
+            break;
+        case 8:
+            printf("  .quad %d\n", val);
+            break;
+        default:
+            error("unknown type size: %d\n", type->type_size);
+    }
+}
+
+void gen_gvar(Gvar* gvar, Vector* strls) {
     printf("%s:\n", gvar->name);
-    printf("  .zero %ld\n", gvar->type->type_size);
+    if (gvar->init) {
+        if (gvar->init->vector) {
+            for (int i = 0; i < gvar->init->vector->size; i++) {
+                InitValue* iv = vec_get(gvar->init->vector, i);
+                Node* scalar = iv->scalar;
+                if (scalar->kind == ND_STRL) {
+                    printf("  .quad .LC%d\n", scalar->strl_id);
+                } else {
+                    gen_gvar_init(gvar->type->ptr_to, scalar->val);
+                }
+            }
+        } else {
+            Node* scalar = gvar->init->scalar;
+            if (scalar->kind == ND_STRL) {
+                char* strl = vec_get(strls, scalar->strl_id);
+                printf("  .string \"%s\"\n", strl);
+            } else {
+                gen_gvar_init(gvar->type, scalar->val);
+            }
+        }
+    } else {
+        printf("  .zero %ld\n", gvar->type->type_size);
+    }
 }
 
 void gen_strl(int id, char* str) {
@@ -296,7 +335,7 @@ void gen_x86_64(Program* prog) {
 
     printf(".data\n");
     for (int i = 0; i < prog->gvars->size; i++) {
-        gen_gvar(vec_get(prog->gvars->vals, i));
+        gen_gvar(vec_get(prog->gvars->vals, i), prog->strls);
     }
 
     for (int i = 0; i < prog->strls->size; i++) {

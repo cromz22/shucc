@@ -43,7 +43,7 @@ Type* read_type() {
     } else if (consume("char")) {
         type = new_ty_char();
     } else {
-        error("No such type");
+        error("No such type: %s", token->str);
     }
     while (consume("*")) {
         type = new_ty_ptr(type);
@@ -128,11 +128,6 @@ Type* read_array(Type* type) {
     return type;
 }
 
-typedef struct {
-    Vector* vector;  // Vector<InitValue *>
-    Node* scalar;
-} InitValue;
-
 InitValue* read_init() {
     InitValue* iv = calloc(1, sizeof(InitValue));
     if (consume("{")) {
@@ -145,6 +140,69 @@ InitValue* read_init() {
         }
     } else {
         iv->scalar = expr();
+    }
+    return iv;
+}
+
+// int a = 1;
+// char b[] = "foobar"; // ok
+// char *d = b;         // ok
+// char *d = b + 0;     // ok
+// char *d = b + 1;     // ok
+// char *d = 1 + b;     // ok
+
+// TODO:
+// int b = a;     // ng
+// int *b = &a;   // ok
+// int *c = b;    // ng
+// int **c = &b;  // ok
+// int a = 2 * 3; // ok
+// int a = 2 - 1; // ok
+
+Node* const_expr();
+
+Node* const_primary() {
+    Node* node;
+    // case const_primary = "(" const_expr ")"
+    if (consume("(")) {
+        node = const_expr();
+        expect(")");
+        return node;
+    }
+
+    // case const_primary = string literal
+    if (consume("\"")) {
+        Token* tok = consume_string();
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_STRL;
+        node->type = new_ty_array(new_ty_char(), tok->len);  // literal の type は parse で決める
+        node->strl_id = strls->size;
+        vec_push(strls, tok->str);
+        expect("\"");
+        return node;
+    }
+
+    // case const_primary = num
+    return new_node_num(expect_number());
+}
+
+/**
+ *  const_expr = const_primary
+ */
+Node* const_expr() { return const_primary(); }
+
+InitValue* read_gvar_init() {
+    InitValue* iv = calloc(1, sizeof(InitValue));
+    if (consume("{")) {
+        iv->vector = vec_create();
+        while (!consume("}")) {
+            if (iv->vector->size > 0) {
+                expect(",");
+            }
+            vec_push(iv->vector, read_gvar_init());
+        }
+    } else {
+        iv->scalar = const_expr();
     }
     return iv;
 }
@@ -281,6 +339,11 @@ void func_or_gvar() {
         node->gvar = gv;
 
         map_insert(gvars, tok->str, gv);
+
+        if (consume("=")) {
+            gv->init = read_gvar_init();
+        }
+
         expect(";");
     }
 }

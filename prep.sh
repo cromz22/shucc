@@ -77,12 +77,21 @@ append "char x = 3; return x;" "3"
 append "int a[3] = {0, 1, 2}; return a[1];" "1"
 append "int a[3] = {2}; return a[2];" "0"
 append "int a[] = {0, 1, 2}; return a[1];" "1"
-# append "char* foo; foo = \"bar\"; return 0;" "0"
+append "char* foo; foo = \"bar\"; return 0;" "0"
 # append "char *str = \"hello\"; return sizeof(str);" "8"
 # append "char *str = \"hello\"; return str[0];" "104"
 # append "char *str = \"hello\"; return str[1];" "101"
 # append "char *str = \"hello\"; return str[2];" "108"
 # append "char str[] = \"hello\"; return sizeof(str);" "8"
+append "return ginit;" "3"
+append "return giarr[0];" "1"
+append "return giarr[1];" "2"
+append "return giarr[2];" "3"
+append "return str[0];" "65"
+append "return str[1];" "66"
+append "return str[2];" "67"
+append "return str[3];" "0"
+append "return strarr[0][0];" "115"
 
 cat <<EOF
 int assert(int expected, int actual, char *code);
@@ -94,6 +103,10 @@ int foo() { return 3; }
 int add(int a, int b) { return a + b; }
 int fibo(int n) { if (n == 1) return 1; else if (n == 0) return 1; else return fibo(n-1) + fibo(n-2); }
 char first(char *str) { return str[0]; }
+int ginit = 3;
+int giarr[3] = {1, 2, 3};
+char str[4] = "ABC";
+char *strarr[3] = {"str0", "str1", "str2"};
 
 EOF
 

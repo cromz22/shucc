@@ -14,6 +14,7 @@ typedef struct Type Type;
 typedef struct Lvar Lvar;
 typedef struct Gvar Gvar;
 typedef struct Func Func;
+typedef struct InitValue InitValue;
 
 typedef struct Vector Vector;
 typedef struct Map Map;
@@ -119,6 +120,12 @@ struct Gvar {
     char *name;
     int len;
     Type *type;
+    InitValue *init;
+};
+
+struct InitValue {
+    Vector *vector;  // Vector<InitValue *>
+    Node *scalar;
 };
 
 /*
