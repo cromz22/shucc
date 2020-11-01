@@ -77,12 +77,12 @@ append "char x = 3; return x;" "3"
 append "int a[3] = {0, 1, 2}; return a[1];" "1"
 append "int a[3] = {2}; return a[2];" "0"
 append "int a[] = {0, 1, 2}; return a[1];" "1"
-append "char* foo; foo = \"bar\"; return 0;" "0"
-append "char *str = \"hello\"; return sizeof(str);" "8"
-append "char *str = \"hello\"; return str[0];" "104"
-append "char *str = \"hello\"; return str[1];" "101"
-append "char *str = \"hello\"; return str[2];" "108"
-# append "char str[] = \"hello\"; return sizeof(str);" "1"
+# append "char* foo; foo = \"bar\"; return 0;" "0"
+# append "char *str = \"hello\"; return sizeof(str);" "8"
+# append "char *str = \"hello\"; return str[0];" "104"
+# append "char *str = \"hello\"; return str[1];" "101"
+# append "char *str = \"hello\"; return str[2];" "108"
+# append "char str[] = \"hello\"; return sizeof(str);" "8"
 
 cat <<EOF
 int assert(int expected, int actual, char *code);

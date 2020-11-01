@@ -98,8 +98,8 @@ typedef enum {
 struct Type {
     TypeKind kind;
     Type *ptr_to;
-    int type_size;
-    size_t array_size;  // used when kind == TY_ARRAY
+    size_t type_size;
+    int array_size;  // used when kind == TY_ARRAY
 };
 
 /**

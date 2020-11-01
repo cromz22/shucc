@@ -44,7 +44,7 @@ void gen_lval(Node* node) {
 
 void gen_gvar(Gvar* gvar) {
     printf("%s:\n", gvar->name);
-    printf("  .zero %d\n", gvar->type->type_size);
+    printf("  .zero %ld\n", gvar->type->type_size);
 }
 
 void gen_strl(int id, char* str) {

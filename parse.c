@@ -128,6 +128,61 @@ Type* read_array(Type* type) {
     return type;
 }
 
+typedef struct {
+    Vector* vector;  // Vector<InitValue *>
+    Node* scalar;
+} InitValue;
+
+InitValue* read_init() {
+    InitValue* iv = calloc(1, sizeof(InitValue));
+    if (consume("{")) {
+        iv->vector = vec_create();
+        while (!consume("}")) {
+            if (iv->vector->size > 0) {
+                expect(",");
+            }
+            vec_push(iv->vector, read_init());
+        }
+    } else {
+        iv->scalar = expr();
+    }
+    return iv;
+}
+
+Node* assign_init(Node* lhs, Type* ltype, InitValue* rhs) {
+    // int a = {2};  // ok
+    // int a[] = {1, 2, 3};  // ok
+    // int a[][3] = {{1, 2, 3}, {1, 2, 3}}; // ok
+    // int a[][] = {{1, 2, 3}, {1, 2, 3}};  // ng
+    // int a[][3] = {{1, 2, 3}, {1, 2}};    // ok
+
+    Node* assign = new_node(ND_BLOCK, NULL, NULL);
+    assign->stmts = vec_create();
+    if (ltype->kind == TY_ARRAY) {
+        for (int i = 0; i < rhs->vector->size; i++) {
+            Node* lhs_i = new_node(ND_ADD, lhs, new_node_num(i));
+            lhs_i = new_node(ND_DEREF, lhs_i, NULL);  // int a[] = {1, 2, 3};  lhs_i: a[i] -> *(a + i)
+            vec_push(assign->stmts, assign_init(lhs_i, ltype->ptr_to, vec_get(rhs->vector, i)));
+        }
+
+        if (ltype->array_size == -1) {
+            ltype->array_size = rhs->vector->size;
+            ltype->type_size = ltype->ptr_to->type_size * ltype->array_size;
+        }
+
+        for (int i = rhs->vector->size; i < ltype->array_size; i++) {
+            Node* lhs_i = new_node(ND_ADD, lhs, new_node_num(i));
+            lhs_i = new_node(ND_DEREF, lhs_i, NULL);
+            InitValue* iv = calloc(1, sizeof(InitValue));
+            iv->scalar = new_node_num(0);
+            vec_push(assign->stmts, assign_init(lhs_i, ltype->ptr_to, iv));
+        }
+    } else {
+        vec_push(assign->stmts, new_node(ND_ASSIGN, lhs, rhs->scalar));
+    }
+    return assign;
+}
+
 /* grammatical functions */
 Node* declaration() {
     Type* type = read_type();
@@ -148,41 +203,11 @@ Node* declaration() {
 
     map_insert(fn->lvars, tok->str, lvar);
 
-    // ND_ASSIGN
     if (consume("=")) {
-        if (type->kind == TY_ARRAY) {
-            expect("{");
-            Node* init = new_node(ND_BLOCK, NULL, NULL);
-            init->stmts = vec_create();
-            for (int i = 0;; i++) {
-                if (consume("}")) {
-                    // stmts に0を追加
-                    if (type->array_size != -1) {
-                        for (int j = i; j < type->array_size; j++) {
-                            Node* add = new_node(ND_ADD, node, new_node_num(j));
-                            vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), new_node_num(0)));
-                        }
-                    }
-                    break;
-                }
-                if (type->array_size != -1 && i >= type->array_size) {
-                    error("excess elements in array inititalizer");
-                }
-                if (init->stmts->size > 0) {
-                    expect(",");
-                }
-                Node* add = new_node(ND_ADD, node, new_node_num(i));                                // *p = ary + 1
-                vec_push(init->stmts, new_node(ND_ASSIGN, new_node(ND_DEREF, add, NULL), expr()));  // *p = 1
-            }
-            if (type->array_size == -1) {
-                type->array_size = init->stmts->size;
-                type->type_size = type->ptr_to->type_size * type->array_size;
-            }
-            return init;
-        } else {
-            node = new_node(ND_ASSIGN, node, assign());
-        }
+        InitValue* rhs = read_init();  // {{1, 2}, {3}}
+        node = assign_init(node, type, rhs);
     }
+
     return node;
 }
 
